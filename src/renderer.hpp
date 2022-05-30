@@ -8,7 +8,7 @@
 class Renderer
 {
 public:
-    Renderer(GLFWwindow *window);
+    Renderer(GLFWwindow **window);
     ~Renderer();
 
     /**

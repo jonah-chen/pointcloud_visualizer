@@ -30,7 +30,7 @@ debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
     }
 }
 
-Renderer::Renderer(GLFWwindow *window)
+Renderer::Renderer(GLFWwindow **window)
 {
     if (!glfwInit())
         throw std::runtime_error("Failed to initialize GLFW");
@@ -39,13 +39,13 @@ Renderer::Renderer(GLFWwindow *window)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    window = glfwCreateWindow(800, 600, "PointCloud", nullptr, nullptr);
-    if (window == nullptr)
+    *window = glfwCreateWindow(800, 600, "PointCloud", nullptr, nullptr);
+    if (*window == nullptr)
     {
         glfwTerminate();
         throw std::runtime_error("Failed to create GLFW window");
     }
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(*window);
     if (glewInit() != GLEW_OK)
         throw std::runtime_error("Failed to initialize GLEW");
     
@@ -94,6 +94,15 @@ Renderer::Renderer(GLFWwindow *window)
 
     glUseProgram(shader_);
     view_proj_loc_ = glGetUniformLocation(shader_, "view_proj");
+}
+
+Renderer::~Renderer()
+{
+    glDeleteBuffers(1, &vbo_);
+    glDeleteBuffers(1, &ebo_);
+    glDeleteVertexArrays(1, &vao_);
+    glDeleteProgram(shader_);
+    glfwTerminate();
 }
 
 void Renderer::draw(const void *pts, const size_t n, const glm::mat4 &view_proj)
