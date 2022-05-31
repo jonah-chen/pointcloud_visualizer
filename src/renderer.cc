@@ -30,7 +30,7 @@ debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
     }
 }
 
-Renderer::Renderer(GLFWwindow **window)
+Renderer::Renderer(GLFWwindow **window, bool fullscreen)
 {
     if (!glfwInit())
         throw std::runtime_error("Failed to initialize GLFW");
@@ -41,11 +41,35 @@ Renderer::Renderer(GLFWwindow **window)
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     glfwWindowHint(GLFW_REFRESH_RATE, FPS);
 
-    // GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-    // const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-    // *window = glfwCreateWindow(mode->width, mode->height, "OpenGL", monitor, nullptr);
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+    width_ = mode->width;
+    height_ = mode->height;
 
-    *window = glfwCreateWindow(1600, 1200, "OpenGL", nullptr, nullptr);
+    if (fullscreen)
+    {
+        *window = glfwCreateWindow(width_, height_, "OpenGL", monitor, nullptr);
+    }
+    else
+    {
+        switch(height_)
+        {
+        case 150 ... 300:
+            width_ = 200; height_ = 150; break;
+        case 301 ... 600:
+            width_ = 400; height_ = 300; break;
+        case 601 ... 1200:
+            width_ = 800; height_ = 600; break;
+        case 1201 ... 2400:
+            width_ = 1600; height_ = 1200; break;
+        case 2401 ... 4800:
+            width_ = 3200; height_ = 2400; break;
+        default:
+            throw std::runtime_error("Window size not supported. Please use fullscreen mode.");
+        }
+        
+        *window = glfwCreateWindow(width_, height_, "OpenGL", nullptr, nullptr);
+    }
     
     if (*window == nullptr)
     {

@@ -24,7 +24,7 @@ public:
     float max_point_size_dist = 60.0f;
 
 public:
-    Renderer(GLFWwindow **window);
+    Renderer(GLFWwindow **window, bool fullscreen = true);
     ~Renderer();
 
     /**
@@ -48,6 +48,10 @@ public:
      */
     void draw(const Camera &camera);
 
+public:
+    constexpr int width() const { return width_; }
+    constexpr int height() const { return height_; }
+
 private:
     GLuint vao_, vbo_, ebo_;
     GLuint shader_;
@@ -58,6 +62,8 @@ private:
     GLint camera_pos_loc_;
 
     size_t buffered_points_ {};
+
+    int width_ = 1600, height_ = 1200;
 
 private:
     const char *vertex_shader = R"(

@@ -10,25 +10,28 @@
 
 static unsigned int age = 0;
 
+
+
 int main(int argc, char** argv)
 {
+    GLFWwindow *window;
+    Renderer renderer(&window);
     Camera camera(
-        glm::vec3(0.0f, 0.0f, 0.0f),    // position
-        glm::vec3(0.0f, 0.0f, -1.0f),   // forward
-        glm::vec3(0.0f, 1.0f, 0.0f),    // up
-        1.2f,                           // fov
-        4.0f / 3.0f,                    // aspect
-        0.1f,                           // near plane
-        20.0f,                          // far plane
-        0.0f                            // ground plane
+        glm::vec3(0.0f, 0.0f, 0.0f),                            // position
+        glm::vec3(0.0f, 0.0f, -1.0f),                           // forward
+        glm::vec3(0.0f, 1.0f, 0.0f),                            // up
+        1.2f,                                                   // fov
+        (float) renderer.width() / (float) renderer.height(),   // aspect
+        0.1f,                                                   // near plane
+        20.0f,                                                  // far plane
+        0.0f                                                    // ground plane
     );
+    HUD hud(window, camera, age, renderer);
+
     std::future<PointCloud> buf_sorted;
     user_inputs inputs, prev_inputs;
     PointCloud vertices = load("/home/hina/Downloads/1.ply", camera.pos(), true);
 
-    GLFWwindow *window;
-    Renderer renderer(&window);
-    HUD hud(window, camera, age, renderer);
 
     // Main loop
     while (!glfwWindowShouldClose(window))
