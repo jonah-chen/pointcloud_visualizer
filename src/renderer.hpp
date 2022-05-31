@@ -19,6 +19,10 @@ public:
     constexpr static int FPS = 60;
 
 public:
+    float point_size_1m = 20.0f;        // default values
+    float max_point_size_dist = 60.0f;
+
+public:
     Renderer(GLFWwindow **window);
     ~Renderer();
 
@@ -30,12 +34,8 @@ public:
      * in the correct vertex layout.
      * @param n number of points to draw.
      * @param view_proj view projection matrix.
-     * @param point_size_1m the point size at 1 meter
-     * @param max_point_size_dist the distance in meters where points no longer 
-     * get bigger when moving closer to the camera.
      */
-    void draw(const void *pts, const size_t n, const glm::mat4 &view_proj, 
-              float point_size_1m, float max_point_size_dist);
+    void draw(const void *pts, const size_t n, const glm::mat4 &view_proj);
 
     /**
      * Draw one frame without changing the scene or sorting of the point.

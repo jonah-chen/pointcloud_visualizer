@@ -29,5 +29,6 @@ add_executable(Pointcloud_Visualizer main.cc
                 ${SRC_DIR}/points.cc
                 ${SRC_DIR}/renderer.cc
                 ${SRC_DIR}/input.cc
-                ${SRC_DIR}/point_ops.cc)
+                ${SRC_DIR}/point_ops.cc
+                ${SRC_DIR}/hud.cc)
 target_link_libraries(Pointcloud_Visualizer OpenGL glfw GLEW ${PCL_LIBRARIES} ${ImGui_LIBRARIES} ImGui_GLFW OpenMP::OpenMP_CXX)
