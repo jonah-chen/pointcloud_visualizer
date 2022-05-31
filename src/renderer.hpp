@@ -14,7 +14,7 @@ public:
     constexpr static int OPENGL_VERSION_MAJOR = 4;
     constexpr static int OPENGL_VERSION_MINOR = 5;
 
-    constexpr static size_t MAX_PTS = (1u << 20);
+    constexpr static size_t MAX_PTS = (1u << 24);
     constexpr static size_t POINT_SIZE = sizeof(vertex_type);
     constexpr static int FPS = 60;
 
@@ -30,8 +30,12 @@ public:
      * in the correct vertex layout.
      * @param n number of points to draw.
      * @param view_proj view projection matrix.
+     * @param point_size_1m the point size at 1 meter
+     * @param max_point_size_dist the distance in meters where points no longer 
+     * get bigger when moving closer to the camera.
      */
-    void draw(const void *pts, const size_t n, const glm::mat4 &view_proj);
+    void draw(const void *pts, const size_t n, const glm::mat4 &view_proj, 
+              float point_size_1m, float max_point_size_dist);
 
     /**
      * Draw one frame without changing the scene or sorting of the point.
@@ -46,7 +50,7 @@ public:
 private:
     GLuint vao_, vbo_, ebo_;
     GLuint shader_;
-    GLint view_proj_loc_;
+    GLint view_proj_loc_, point_size_1m_loc_, max_point_size_loc_;
     size_t buffered_points_ {};
 
 private:
@@ -57,11 +61,13 @@ private:
         layout(location = 2) in float aD2;
 
         uniform mat4 view_proj;
+        uniform float max_point_size;
+        uniform float point_size_1m;
 
         out vec3 ourColor;
         void main()
         {
-            gl_PointSize = 30.0f / aD2;
+            gl_PointSize = min(point_size_1m / aD2, max_point_size);
             gl_Position = view_proj * vec4(aPos, 1.0);
             ourColor = aColor;
         }

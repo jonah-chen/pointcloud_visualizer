@@ -7,6 +7,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(ImGui REQUIRED)
+find_package(OpenMP REQUIRED)
 
 set (SRC_DIR src)
 set (INCLUDE_DIR include)
@@ -27,5 +28,6 @@ add_executable(Pointcloud_Visualizer main.cc
                 ${SRC_DIR}/camera.cc
                 ${SRC_DIR}/points.cc
                 ${SRC_DIR}/renderer.cc
-                ${SRC_DIR}/input.cc)
-target_link_libraries(Pointcloud_Visualizer OpenGL glfw GLEW ${PCL_LIBRARIES} ${ImGui_LIBRARIES} ImGui_GLFW)
+                ${SRC_DIR}/input.cc
+                ${SRC_DIR}/point_ops.cc)
+target_link_libraries(Pointcloud_Visualizer OpenGL glfw GLEW ${PCL_LIBRARIES} ${ImGui_LIBRARIES} ImGui_GLFW OpenMP::OpenMP_CXX)

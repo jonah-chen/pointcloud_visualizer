@@ -13,15 +13,16 @@ user_inputs user_inputs::fetch(GLFWwindow *window)
 			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
 	RMB(inputs) =
 			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-	K_SPACE(inputs) = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
-	K_LSHIFT(inputs) = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-	K_W(inputs) = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
-	K_A(inputs) = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
-	K_S(inputs) = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
-	K_D(inputs) = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
-	K_ESC(inputs) = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
-	K_P(inputs) = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
-    K_LCTRL(inputs) = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+
+	K_SPACE(inputs) 	= glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+	K_LSHIFT(inputs) 	= glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+	K_W(inputs) 		= glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
+	K_A(inputs) 		= glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
+	K_S(inputs) 		= glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
+	K_D(inputs) 		= glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
+	K_ESC(inputs) 		= glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+	K_R(inputs) 		= glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS;
+    K_LCTRL(inputs) 	= glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
 	return inputs;
 }
 
@@ -78,7 +79,7 @@ std::ostream &operator<<(std::ostream &os, const user_inputs &inputs)
 	   << " W:" << K_W(inputs) << " A:" << K_A(inputs)
 	   << " S:" << K_S(inputs) << " D:" << K_D(inputs)
 	   << " SPACE:" << K_SPACE(inputs) << " LSHIFT:" << K_LSHIFT(inputs)
-	   << " ESC:" << K_ESC(inputs) << " P:" << K_P(inputs) 
+	   << " ESC:" << K_ESC(inputs) << " R:" << K_R(inputs) 
        << " LCTRL:" << K_LCTRL(inputs);
 	return os;
 }

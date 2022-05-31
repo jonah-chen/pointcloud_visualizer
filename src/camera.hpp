@@ -41,17 +41,16 @@ private:
     glm::mat4 proj_;            // projection matrix
     glm::vec3 pos_;             // position of camera
     glm::vec3 fwd_, up_, right_;// forward, up, right vectors
-    float ground_level_;        // ground level
+
+public:
+    float ground_level;        // ground level
 
 public:
     constexpr glm::vec3 pos() const { return pos_; }
     constexpr glm::vec3 fwd() const { return fwd_; }
     constexpr glm::vec3 up() const { return up_; }
     constexpr glm::vec3 right() const { return right_; }
-    constexpr float ground_level() const { return ground_level_; }
     
     inline glm::mat4 view_proj() const 
     { return proj_ * glm::lookAt(pos_, pos_ + fwd_, up_); }
-    
-    void ground_level(float ground_level) { ground_level_ = ground_level; }
 };

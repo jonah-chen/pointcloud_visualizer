@@ -5,8 +5,7 @@
 #include <pcl/point_cloud.h>
 #include <glm/glm.hpp>
 
-using PointCloud = pcl::PointCloud<pcl::PointXYZRGB>;
-
+using pcl_PointCloud = pcl::PointCloud<pcl::PointXYZRGB>;
 struct XYZRGBD
 {
     union
@@ -17,10 +16,19 @@ struct XYZRGBD
             float x, y, z;
         };
     };
-    float r, g, b;
+    union
+    {
+        glm::vec3 rgb;
+        struct
+        {
+            float r, g, b;
+        };
+    };
     float d_sq;
 
     XYZRGBD();
+    XYZRGBD(const XYZRGBD &pt) = default;
+
     XYZRGBD(const pcl::PointXYZRGB &pt);
     XYZRGBD(const pcl::PointXYZRGB &pt, float d);
     XYZRGBD(const pcl::PointXYZRGB &pt, const glm::vec3 &camera_pos, bool exchange_yz=false);
@@ -36,6 +44,25 @@ struct XYZRGBD
     inline bool operator>(const XYZRGBD &rhs) const { return d_sq > rhs.d_sq; }
 };
 
-std::vector<XYZRGBD> load(const std::string &filename, const glm::vec3 &camera_pos, bool exchange_xz);
+using PointCloud = std::vector<XYZRGBD>;
+using Mask = std::vector<bool>;
 
-void update(std::vector<XYZRGBD> &points, const glm::vec3 &camera_pos);
+struct BBox
+{
+    glm::vec3 bl;
+    glm::vec3 tr;
+    BBox();
+    BBox(const glm::vec3 &_x, const glm::vec3 &_y, bool center_size_fmt=true);
+};
+
+PointCloud load(const std::string &filename, const glm::vec3 &camera_pos, bool exchange_xz);
+
+void update(PointCloud &points, const glm::vec3 &camera_pos);
+
+void resort(PointCloud &points);
+
+PointCloud update_async(const PointCloud &points, const glm::vec3 &camera_pos);
+
+PointCloud resort_async(const PointCloud &points);
+
+PointCloud update_resort_async(const PointCloud &points, const glm::vec3 &camera_pos);

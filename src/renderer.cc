@@ -113,6 +113,8 @@ Renderer::Renderer(GLFWwindow **window)
 
     glUseProgram(shader_);
     view_proj_loc_ = glGetUniformLocation(shader_, "view_proj");
+    max_point_size_loc_ = glGetUniformLocation(shader_, "max_point_size");
+    point_size_1m_loc_ = glGetUniformLocation(shader_, "point_size_1m");
 }
 
 Renderer::~Renderer()
@@ -124,13 +126,16 @@ Renderer::~Renderer()
     glfwTerminate();
 }
 
-void Renderer::draw(const void *pts, const size_t n, const glm::mat4 &view_proj)
+void Renderer::draw(const void *pts, const size_t n, const glm::mat4 &view_proj,
+                    float point_size_1m, float max_point_size_dist)
 {
     if (n > MAX_PTS)
         throw std::runtime_error("Too many points of " + std::to_string(n) + " to draw");
     
     buffered_points_ = n;
     glBufferSubData(GL_ARRAY_BUFFER, 0, buffered_points_ * POINT_SIZE, pts);
+    glUniform1f(point_size_1m_loc_, point_size_1m);
+    glUniform1f(max_point_size_loc_, 1.f /(max_point_size_dist * max_point_size_dist));
     draw(view_proj);
 }
 

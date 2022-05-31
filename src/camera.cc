@@ -13,7 +13,7 @@ Camera::Camera(const glm::vec3 &pos,
                float zFar,
                float ground_level)
     : pos_(pos),
-      ground_level_(ground_level)
+      ground_level(ground_level)
 {
     fwd_ = glm::normalize(fwd);
     up_ = glm::normalize(up);
@@ -50,8 +50,8 @@ void Camera::translate(float fwd, float right, float up)
     pos_.y += up;
     pos_.z += fwd * fwd_.z + right * right_.z;
 
-    if (pos_.y < ground_level_)
-        pos_.y = ground_level_;
+    if (pos_.y < ground_level)
+        pos_.y = ground_level;
 }
 
 
