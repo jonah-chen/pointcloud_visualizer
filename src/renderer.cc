@@ -35,8 +35,8 @@ Renderer::Renderer(GLFWwindow **window)
     if (!glfwInit())
         throw std::runtime_error("Failed to initialize GLFW");
     
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_VERSION_MAJOR);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_VERSION_MINOR);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     glfwWindowHint(GLFW_REFRESH_RATE, FPS);
@@ -53,6 +53,7 @@ Renderer::Renderer(GLFWwindow **window)
         throw std::runtime_error("Failed to create GLFW window");
     }
     glfwMakeContextCurrent(*window);
+    glfwSwapInterval(1);
     
 	// disable cursor
 	glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -61,9 +62,13 @@ Renderer::Renderer(GLFWwindow **window)
         throw std::runtime_error("Failed to initialize GLEW");
     
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(debugCallback, nullptr);
+
+    if (OPENGL_VERSION_MAJOR >= 4 && OPENGL_VERSION_MINOR >= 3)
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(debugCallback, nullptr);
+    }
 
     glGenVertexArrays(1, &vao_);
     glBindVertexArray(vao_);

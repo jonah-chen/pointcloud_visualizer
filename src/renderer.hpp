@@ -11,6 +11,9 @@ class Renderer
 public:
     using vertex_type = XYZRGBD;
 
+    constexpr static int OPENGL_VERSION_MAJOR = 4;
+    constexpr static int OPENGL_VERSION_MINOR = 5;
+
     constexpr static size_t MAX_PTS = (1u << 20);
     constexpr static size_t POINT_SIZE = sizeof(vertex_type);
     constexpr static int FPS = 60;
