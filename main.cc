@@ -5,17 +5,55 @@
 #include "input.hpp"
 #include "hud.hpp"
 
+#include <string>
+#include <iostream>
 #include <future>
 #include <chrono>
+#include <unordered_map>
 
 static unsigned int age = 0;
 
+std::unordered_map<std::string, char*> parse_args(int argc, char **argv)
+{
+    std::unordered_map<std::string, char*> args;
+    if (argc == 2 && strcmp("--help", argv[1]) == 0)
+    {
+        std::cout << "Usage: ./renderer <input ply/pcd> [OPTIONS]\n"
+                     "Options:\n"
+                     "  --windowed: run in windowed mode\n"
+                     "  --yz      : swap yz coordinates in input file\n";
+        exit(EXIT_SUCCESS);
+    }
 
+    args["pointcloud"] = argv[1];
+
+    for (int i = 2; i < argc; ++i)
+    {
+        std::string arg = argv[i];
+        if (arg.find("--") == 0)
+        {
+            std::string key = arg.substr(2);
+            args[key] = nullptr;
+            if (i + 1 < argc)
+            {
+                std::string value = argv[i + 1];
+                if (value.find("--") == 0)
+                    continue;
+                args[key] = argv[i + 1];
+            }
+        }
+    }
+    for (auto &[key, value] : args)
+        std::cout << key << ": " << value << "\n";
+    return args;
+}
 
 int main(int argc, char** argv)
 {
+    auto args = parse_args(argc, argv);
+
     GLFWwindow *window;
-    Renderer renderer(&window);
+    Renderer renderer(&window, args.find("windowed") == args.end());
     Camera camera(
         glm::vec3(0.0f, 0.0f, 0.0f),                            // position
         glm::vec3(0.0f, 0.0f, -1.0f),                           // forward
@@ -30,8 +68,8 @@ int main(int argc, char** argv)
 
     std::future<PointCloud> buf_sorted;
     user_inputs inputs, prev_inputs;
-    PointCloud vertices = load("/home/hina/Downloads/1.ply", camera.pos(), true);
-
+    PointCloud vertices = load(args["pointcloud"], camera.pos(), 
+        args.find("yz") == args.end());
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -62,7 +100,6 @@ int main(int argc, char** argv)
             age++;
             if (!buf_sorted.valid())
             {
-                update(vertices, camera.pos());
                 buf_sorted = std::async(std::launch::async, update_resort_async, vertices, camera.pos());
             }
             else if (buf_sorted.wait_for(std::chrono::seconds(0)) == std::future_status::ready)

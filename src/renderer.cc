@@ -7,6 +7,8 @@
 #include <numeric>
 #include <glm/gtc/type_ptr.hpp>
 
+#ifndef NDEBUG
+
 static void APIENTRY
 debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
 			  GLsizei length, const GLchar *message, const void *userParam)
@@ -30,6 +32,8 @@ debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
     }
 }
 
+#endif
+
 Renderer::Renderer(GLFWwindow **window, bool fullscreen)
 {
     if (!glfwInit())
@@ -46,12 +50,9 @@ Renderer::Renderer(GLFWwindow **window, bool fullscreen)
     width_ = mode->width;
     height_ = mode->height;
 
-    if (fullscreen)
+    if (!fullscreen)
     {
-        *window = glfwCreateWindow(width_, height_, "OpenGL", monitor, nullptr);
-    }
-    else
-    {
+        monitor = nullptr;
         switch(height_)
         {
         case 150 ... 300:
@@ -67,10 +68,9 @@ Renderer::Renderer(GLFWwindow **window, bool fullscreen)
         default:
             throw std::runtime_error("Window size not supported. Please use fullscreen mode.");
         }
-        
-        *window = glfwCreateWindow(width_, height_, "OpenGL", nullptr, nullptr);
     }
     
+    *window = glfwCreateWindow(width_, height_, "Pointcloud Visualizer", monitor, nullptr);
     if (*window == nullptr)
     {
         glfwTerminate();
@@ -87,12 +87,14 @@ Renderer::Renderer(GLFWwindow **window, bool fullscreen)
     
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
+#ifndef NDEBUG
     if (OPENGL_VERSION_MAJOR >= 4 && OPENGL_VERSION_MINOR >= 3)
     {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(debugCallback, nullptr);
     }
+#endif
 
     glGenVertexArrays(1, &vao_);
     glBindVertexArray(vao_);
