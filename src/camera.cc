@@ -13,14 +13,14 @@ Camera::Camera(const glm::vec3 &pos,
                float zFar,
                float ground_level)
     : pos_(pos),
-      proj_(glm::perspective(fov, aspect, zNear, zFar)),
       ground_level_(ground_level)
 {
     fwd_ = glm::normalize(fwd);
     up_ = glm::normalize(up);
     right_ = glm::cross(fwd_, up_);
+    proj_ = glm::perspective(fov, aspect, zNear, zFar);
 
-    if (glm::dot(fwd_, up_) == 0.0f)
+    if (glm::dot(fwd_, up_) > 0.999f)
         throw std::runtime_error("Camera::Camera: fwd and up are parallel");
 }
 

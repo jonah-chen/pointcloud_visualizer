@@ -14,6 +14,7 @@ include_directories(${SRC_DIR} ${PCL_INCLUDE_DIRS} ${OpenGL_INCLUDE_DIRS} ${glfw
 add_executable(Pointcloud_Visualizer main.cc 
                 ${SRC_DIR}/camera.cc
                 ${SRC_DIR}/points.cc
-                ${SRC_DIR}/renderer.cc)
+                ${SRC_DIR}/renderer.cc
+                ${SRC_DIR}/input.cc)
 target_link_libraries(Pointcloud_Visualizer OpenGL glfw GLEW ${PCL_LIBRARIES})
 

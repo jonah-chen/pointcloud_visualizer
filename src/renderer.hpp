@@ -4,9 +4,17 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include "points.hpp"
 
 class Renderer
 {
+public:
+    using vertex_type = XYZRGBD;
+
+    constexpr static size_t MAX_PTS = (1u << 20);
+    constexpr static size_t POINT_SIZE = sizeof(vertex_type);
+    constexpr static int FPS = 60;
+
 public:
     Renderer(GLFWwindow **window);
     ~Renderer();
@@ -32,9 +40,6 @@ public:
      */
     void draw(const glm::mat4 &view_proj);
 
-    constexpr static size_t MAX_PTS = (1u << 20);
-    constexpr static size_t POINT_SIZE = 6 * sizeof(float);
-
 private:
     GLuint vao_, vbo_, ebo_;
     GLuint shader_;
@@ -46,13 +51,14 @@ private:
         #version 450 core
         layout(location = 0) in vec3 aPos;
         layout(location = 1) in vec3 aColor;
+        layout(location = 2) in float aD2;
 
         uniform mat4 view_proj;
 
         out vec3 ourColor;
         void main()
         {
-            gl_PointSize = 10.0;
+            gl_PointSize = 30.0f / aD2;
             gl_Position = view_proj * vec4(aPos, 1.0);
             ourColor = aColor;
         }

@@ -39,13 +39,24 @@ Renderer::Renderer(GLFWwindow **window)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    *window = glfwCreateWindow(800, 600, "PointCloud", nullptr, nullptr);
+    glfwWindowHint(GLFW_REFRESH_RATE, FPS);
+
+    // GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    // const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+    // *window = glfwCreateWindow(mode->width, mode->height, "OpenGL", monitor, nullptr);
+
+    *window = glfwCreateWindow(1600, 1200, "OpenGL", nullptr, nullptr);
+    
     if (*window == nullptr)
     {
         glfwTerminate();
         throw std::runtime_error("Failed to create GLFW window");
     }
     glfwMakeContextCurrent(*window);
+    
+	// disable cursor
+	glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     if (glewInit() != GLEW_OK)
         throw std::runtime_error("Failed to initialize GLEW");
     
@@ -62,11 +73,14 @@ Renderer::Renderer(GLFWwindow **window)
     glBufferData(GL_ARRAY_BUFFER, POINT_SIZE * MAX_PTS, nullptr, GL_DYNAMIC_DRAW);
 
     // XYZ
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, nullptr);
     glEnableVertexAttribArray(0);
     // RGB
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    // D^2
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, POINT_SIZE, (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glGenBuffers(1, &ebo_);
     std::vector<GLuint> indices(MAX_PTS);
