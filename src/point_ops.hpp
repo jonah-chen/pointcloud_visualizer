@@ -3,6 +3,25 @@
 
 #include "points.hpp"
 
-Mask load_mask(const std::string &filename);
+struct Mask
+{
+    std::vector<bool> mask;
+    glm::vec3 color;
+    std::string cls;
+    bool active { false }; 
 
-void apply_mask(PointCloud &points, const Mask &mask, const glm::vec3 &color);
+    Mask(const std::string &filename, const glm::vec3 &color, const std::string &cls);
+    void apply(PointCloud &points);
+};
+
+struct BBox
+{
+    glm::vec3 bl;
+    glm::vec3 tr;
+    BBox();
+    BBox(const glm::vec3 &_x, const glm::vec3 &_y, bool center_size_fmt=true);
+};
+
+std::vector<Mask> load_masks(const std::string &filename);
+
+BBox tightest_bbox(const PointCloud &points, const Mask &mask);

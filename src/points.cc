@@ -63,25 +63,6 @@ void XYZRGBD::update(const glm::vec3 &camera_pos)
     d_sq = glm::distance2(xyz, camera_pos);
 }
 
-BBox::BBox()
-{
-    memset(this, 0, sizeof(BBox));
-}
-
-BBox::BBox(const glm::vec3 &_x, const glm::vec3 &_y, bool center_size_fmt)
-{
-    if (center_size_fmt)
-    {
-        bl = _x - _y / 2.0f;
-        tr = _x + _y / 2.0f;
-    }
-    else
-    {
-        bl = _x;
-        tr = _y;
-    }
-}
-
 void update(PointCloud &points, const glm::vec3 &camera_pos)
 {
 #pragma omp parallel for

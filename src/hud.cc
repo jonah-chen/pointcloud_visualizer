@@ -1,8 +1,9 @@
 
 #include "hud.hpp"
 
-HUD::HUD(GLFWwindow *window, Camera &camera, unsigned int &age, Renderer &renderer)
-    : camera_(camera), age_(age)
+HUD::HUD(GLFWwindow *window, Camera &camera, unsigned int &age, 
+         Renderer &renderer, std::vector<Mask> &masks)
+    : camera_(camera), age_(age), masks_(masks)
 {
     point_size_1m_ptr_ = &(renderer.point_size_1m);
     max_point_size_dist_ptr_ = &(renderer.max_point_size_dist);
@@ -49,6 +50,8 @@ void HUD::configure()
     ImGui::Text("R       - force re-sort points");
     ImGui::Text("Esc     - toggle cursor mode");
     ImGui::End();
+
+    ImGui::Begin("Masks");
 }
 
 void HUD::render()

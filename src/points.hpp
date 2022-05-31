@@ -4,6 +4,8 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <glm/glm.hpp>
+#include <string>
+#include <vector>
 
 using pcl_PointCloud = pcl::PointCloud<pcl::PointXYZRGB>;
 struct XYZRGBD
@@ -45,15 +47,6 @@ struct XYZRGBD
 };
 
 using PointCloud = std::vector<XYZRGBD>;
-using Mask = std::vector<bool>;
-
-struct BBox
-{
-    glm::vec3 bl;
-    glm::vec3 tr;
-    BBox();
-    BBox(const glm::vec3 &_x, const glm::vec3 &_y, bool center_size_fmt=true);
-};
 
 PointCloud load(const std::string &filename, const glm::vec3 &camera_pos, bool exchange_xz);
 

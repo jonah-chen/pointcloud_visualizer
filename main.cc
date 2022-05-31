@@ -5,7 +5,6 @@
 #include "input.hpp"
 #include "hud.hpp"
 
-#include <string>
 #include <iostream>
 #include <future>
 #include <chrono>
@@ -16,12 +15,16 @@ static unsigned int age = 0;
 std::unordered_map<std::string, char*> parse_args(int argc, char **argv)
 {
     std::unordered_map<std::string, char*> args;
-    if (argc == 2 && strcmp("--help", argv[1]) == 0)
+    if (argc == 1 || argc == 2 && strcmp("--help", argv[1]) == 0)
     {
         std::cout << "Usage: ./renderer <input ply/pcd> [OPTIONS]\n"
                      "Options:\n"
-                     "  --windowed: run in windowed mode\n"
-                     "  --yz      : swap yz coordinates in input file\n";
+                     "  --windowed : run in windowed mode\n"
+                     "  --yz : swap yz coordinates in input file\n"
+                     "  --mask <path to mask file> : mask file with format:\n"
+                     "      <path to mask> <color hex code> <class>\n"
+                     "      ...\n";
+
         exit(EXIT_SUCCESS);
     }
 
@@ -43,10 +46,9 @@ std::unordered_map<std::string, char*> parse_args(int argc, char **argv)
             }
         }
     }
-    for (auto &[key, value] : args)
-        std::cout << key << ": " << value << "\n";
     return args;
 }
+
 
 int main(int argc, char** argv)
 {
@@ -64,12 +66,19 @@ int main(int argc, char** argv)
         20.0f,                                                  // far plane
         0.0f                                                    // ground plane
     );
-    HUD hud(window, camera, age, renderer);
 
     std::future<PointCloud> buf_sorted;
+    std::vector<Mask> masks;
+
     user_inputs inputs, prev_inputs;
-    PointCloud vertices = load(args["pointcloud"], camera.pos(), 
+    PointCloud cloud = load(args["pointcloud"], camera.pos(), 
         args.find("yz") == args.end());
+    
+    if (args.find("mask") != args.end())
+        masks = load_masks(args["mask"]);
+      
+    HUD hud(window, camera, age, renderer, masks);
+
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -91,8 +100,8 @@ int main(int argc, char** argv)
 
         if (K_R(inputs))
         {
-            update(vertices, camera.pos());
-            resort(vertices);
+            update(cloud, camera.pos());
+            resort(cloud);
             age = 0;
         }
         else
@@ -100,11 +109,11 @@ int main(int argc, char** argv)
             age++;
             if (!buf_sorted.valid())
             {
-                buf_sorted = std::async(std::launch::async, update_resort_async, vertices, camera.pos());
+                buf_sorted = std::async(std::launch::async, update_resort_async, cloud, camera.pos());
             }
             else if (buf_sorted.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
             {
-                vertices = buf_sorted.get();
+                cloud = buf_sorted.get();
                 age = 0;
             }
         }
@@ -114,7 +123,7 @@ int main(int argc, char** argv)
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        renderer.draw(vertices.data(), vertices.size(), camera);
+        renderer.draw(cloud.data(), cloud.size(), camera);
         hud.render();
 
         glfwSwapBuffers(window);
