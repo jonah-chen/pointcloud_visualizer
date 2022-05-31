@@ -1,6 +1,5 @@
 
 #include "renderer.hpp"
-#include "camera.hpp"
 #include "points.hpp"
 #include "point_ops.hpp"
 #include "input.hpp"
@@ -75,7 +74,7 @@ int main(int argc, char** argv)
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        renderer.draw(vertices.data(), vertices.size(), camera.view_proj());
+        renderer.draw(vertices.data(), vertices.size(), camera);
         hud.render();
 
         glfwSwapBuffers(window);

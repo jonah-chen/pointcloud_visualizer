@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include "points.hpp"
+#include "camera.hpp"
 
 class Renderer
 {
@@ -35,7 +36,7 @@ public:
      * @param n number of points to draw.
      * @param view_proj view projection matrix.
      */
-    void draw(const void *pts, const size_t n, const glm::mat4 &view_proj);
+    void draw(const void *pts, const size_t n, const Camera &camera);
 
     /**
      * Draw one frame without changing the scene or sorting of the point.
@@ -45,12 +46,17 @@ public:
      * 
      * @param view_proj new view projection matrix.
      */
-    void draw(const glm::mat4 &view_proj);
+    void draw(const Camera &camera);
 
 private:
     GLuint vao_, vbo_, ebo_;
     GLuint shader_;
-    GLint view_proj_loc_, point_size_1m_loc_, max_point_size_loc_;
+
+    GLint view_proj_loc_;
+    GLint point_size_1m_loc_; 
+    GLint max_point_size_loc_;
+    GLint camera_pos_loc_;
+
     size_t buffered_points_ {};
 
 private:
@@ -58,16 +64,18 @@ private:
         #version 450 core
         layout(location = 0) in vec3 aPos;
         layout(location = 1) in vec3 aColor;
-        layout(location = 2) in float aD2;
 
         uniform mat4 view_proj;
         uniform float max_point_size;
         uniform float point_size_1m;
+        uniform vec3 camera_pos;
 
         out vec3 ourColor;
         void main()
         {
-            gl_PointSize = min(point_size_1m / aD2, max_point_size);
+            vec3 displacement = aPos - camera_pos;
+            float dist2 = dot(displacement, displacement);
+            gl_PointSize = min(point_size_1m / dist2, max_point_size);
             gl_Position = view_proj * vec4(aPos, 1.0);
             ourColor = aColor;
         }

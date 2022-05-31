@@ -115,6 +115,7 @@ Renderer::Renderer(GLFWwindow **window)
     view_proj_loc_ = glGetUniformLocation(shader_, "view_proj");
     max_point_size_loc_ = glGetUniformLocation(shader_, "max_point_size");
     point_size_1m_loc_ = glGetUniformLocation(shader_, "point_size_1m");
+    camera_pos_loc_ = glGetUniformLocation(shader_, "camera_pos");
 }
 
 Renderer::~Renderer()
@@ -126,7 +127,7 @@ Renderer::~Renderer()
     glfwTerminate();
 }
 
-void Renderer::draw(const void *pts, const size_t n, const glm::mat4 &view_proj)
+void Renderer::draw(const void *pts, const size_t n, const Camera &camera)
 {
     if (n > MAX_PTS)
         throw std::runtime_error("Too many points of " + std::to_string(n) + " to draw");
@@ -135,11 +136,12 @@ void Renderer::draw(const void *pts, const size_t n, const glm::mat4 &view_proj)
     glBufferSubData(GL_ARRAY_BUFFER, 0, buffered_points_ * POINT_SIZE, pts);
     glUniform1f(point_size_1m_loc_, point_size_1m);
     glUniform1f(max_point_size_loc_, 1e4f /(max_point_size_dist * max_point_size_dist));
-    draw(view_proj);
+    draw(camera);
 }
 
-void Renderer::draw(const glm::mat4 &view_proj)
+void Renderer::draw(const Camera &camera)
 {
-    glUniformMatrix4fv(view_proj_loc_, 1, GL_FALSE, glm::value_ptr(view_proj));
+    glUniformMatrix4fv(view_proj_loc_, 1, GL_FALSE, glm::value_ptr(camera.view_proj()));
+    glUniform3fv(camera_pos_loc_, 1, glm::value_ptr(camera.pos()));
     glDrawElements(GL_POINTS, buffered_points_, GL_UNSIGNED_INT, nullptr);
 }
