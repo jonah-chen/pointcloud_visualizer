@@ -7,7 +7,6 @@ find_package(PCL REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(ImGui REQUIRED)
 find_package(OpenMP REQUIRED)
 
 set(SRC_DIR src)
@@ -18,11 +17,10 @@ include_directories(${SRC_DIR}
                     ${PCL_INCLUDE_DIRS}
                     ${OpenGL_INCLUDE_DIRS}
                     ${glfw3_INCLUDE_DIRS}
-                    ${GLEW_INCLUDE_DIRS}
-                    ${ImGui_INCLUDE_DIRS})
+                    ${GLEW_INCLUDE_DIRS})
 
-add_library(ImGui_GLFW STATIC ${INCLUDE_DIR}/imgui_impl_glfw.cpp ${INCLUDE_DIR}/imgui_impl_opengl3.cpp)
-target_link_libraries(ImGui_GLFW ${glfw3_LIBRARIES} imgui)
+add_library(ImGui_GLFW STATIC ${INCLUDE_DIR}/imgui_impl_glfw.cpp ${INCLUDE_DIR}/imgui_impl_opengl3.cpp ${INCLUDE_DIR}/imgui.cpp ${INCLUDE_DIR}/imgui_tables.cpp ${INCLUDE_DIR}/imgui_widgets.cpp ${INCLUDE_DIR}/imgui_draw.cpp)
+target_link_libraries(ImGui_GLFW ${glfw3_LIBRARIES})
 
 add_executable(Pointcloud_Visualizer ${SRC_DIR}/main.cc 
                 ${SRC_DIR}/camera.cc

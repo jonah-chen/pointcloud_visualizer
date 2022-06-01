@@ -11,7 +11,7 @@ PointCloud load(const std::string &filename,
                           const glm::vec3 &camera_pos,
                           bool exchange_xz)
 {
-    pcl_PointCloud::Ptr cloud = std::make_shared<pcl_PointCloud>();
+    pcl_PointCloud::Ptr cloud ( new pcl_PointCloud );
     if (filename.substr(filename.find_last_of(".") + 1) == "ply")
         pcl::io::loadPLYFile(filename, *cloud);
     else if (filename.substr(filename.find_last_of(".") + 1) == "pcd")
