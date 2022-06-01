@@ -59,7 +59,7 @@ void HUD::configure()
         ImGui::Begin("Masks");
         for (auto &mask : masks_)
         {
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(mask.color.x, mask.color.y, mask.color.z, 1.0f));
+            // ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(mask.color.x, mask.color.y, mask.color.z, 1.0f));
             ImGui::Checkbox(mask.cls.c_str(), &mask.active);
         }
         ImGui::End();

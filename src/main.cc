@@ -54,6 +54,8 @@ int main(int argc, char** argv)
 {
     auto args = parse_args(argc, argv);
 
+    std::vector<std::future<PointCloud>> garbage;
+
     GLFWwindow *window;
     Renderer renderer(&window, args.find("windowed") == args.end());
     Camera camera(
@@ -71,16 +73,17 @@ int main(int argc, char** argv)
     std::vector<Mask> masks;
     std::vector<bool> masks_applied;
     bool mask_updated;
-    for (const auto &mask : masks)
-        masks_applied.push_back(mask.active);
 
     user_inputs inputs, prev_inputs;
     PointCloud og_cloud = load(args["pointcloud"], camera.pos(), 
         args.find("yz") == args.end());
     PointCloud cloud = og_cloud; // make a copy of original order for masking purposes
     
-    if (args.find("mask") != args.end())
-        masks = load_masks(args["mask"]);
+    if (args.find("masks") != args.end())
+        masks = load_masks(args["masks"]);
+    
+    for (const auto &mask : masks)
+        masks_applied.push_back(mask.active);
       
     HUD hud(window, camera, age, renderer, masks);
 
@@ -119,6 +122,9 @@ int main(int argc, char** argv)
                 if (mask)
                     mask.apply(cloud);
             }
+            garbage.push_back(std::move(buf_sorted));
+            buf_sorted = std::async(std::launch::async, update_resort_async, 
+                cloud, camera.pos());
         }
         if (K_R(inputs) || mask_updated)
         {
@@ -153,5 +159,8 @@ int main(int argc, char** argv)
         glfwSwapBuffers(window);
     }
 
+    for (auto &fut : garbage)
+        fut.wait();
+    
     return 0;
 }

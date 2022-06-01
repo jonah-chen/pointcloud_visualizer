@@ -28,12 +28,14 @@ Mask::Mask(const std::string &filename, const glm::vec3 &color, const std::strin
 {
     std::ifstream ifs(filename);
     if (!ifs)
-        throw std::runtime_error("load_mask: failed to open file");
+        throw std::runtime_error("load_mask: failed to open file " + filename);
 
-    while (ifs.peek() != EOF)
+    while (ifs.good())
     {
         int i;
         ifs >> i;
+        if (ifs.eof())
+            break;
         mask.push_back(i);
     }
 }
@@ -55,9 +57,15 @@ std::vector<Mask> load_masks(const std::string &filename)
 {
     std::ifstream ifs(filename);
     if (!ifs)
-        throw std::runtime_error("load_masks: failed to open file");
+        throw std::runtime_error("load_masks: failed to open file " + filename);
 
     std::vector<Mask> masks;
+    std::string fileroot;
+
+    auto _i = filename.find_last_of('/');
+    if (_i != std::string::npos)
+        fileroot = filename.substr(0, _i + 1);
+
     while (ifs.peek() != EOF)
     {
         std::string fn;
@@ -70,7 +78,7 @@ std::vector<Mask> load_masks(const std::string &filename)
         uint8_t b = std::stoi(hex.substr(4, 2), nullptr, 16);
         glm::vec3 color(r / 255.0f, g / 255.0f, b / 255.0f);
 
-        masks.emplace_back(fn, color, cls);
+        masks.emplace_back(fileroot + fn, color, cls);
     }
     return masks;
 }
