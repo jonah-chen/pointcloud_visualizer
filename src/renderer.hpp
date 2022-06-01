@@ -34,7 +34,7 @@ public:
      * @param pts points to draw. Must be sorted, in world coordinates, and 
      * in the correct vertex layout.
      * @param n number of points to draw.
-     * @param view_proj view projection matrix.
+     * @param camera camera to use for the perspective.
      */
     void draw(const void *pts, const size_t n, const Camera &camera);
 
@@ -44,7 +44,7 @@ public:
      * @warning this should only be used for small movements otherwise it can
      * lead to inaccurate renders.
      * 
-     * @param view_proj new view projection matrix.
+     * @param camera camera to use for the perspective.
      */
     void draw(const Camera &camera);
 

@@ -14,12 +14,19 @@ set(INCLUDE_DIR include)
 
 include_directories(${SRC_DIR} 
                     ${INCLUDE_DIR}
+                    ${INCLUDE_DIR}/imgui
                     ${PCL_INCLUDE_DIRS}
                     ${OpenGL_INCLUDE_DIRS}
                     ${glfw3_INCLUDE_DIRS}
                     ${GLEW_INCLUDE_DIRS})
 
-add_library(ImGui_GLFW STATIC ${INCLUDE_DIR}/imgui_impl_glfw.cpp ${INCLUDE_DIR}/imgui_impl_opengl3.cpp ${INCLUDE_DIR}/imgui.cpp ${INCLUDE_DIR}/imgui_tables.cpp ${INCLUDE_DIR}/imgui_widgets.cpp ${INCLUDE_DIR}/imgui_draw.cpp)
+add_library(ImGui_GLFW STATIC 
+            ${INCLUDE_DIR}/imgui/imgui_impl_glfw.cpp
+            ${INCLUDE_DIR}/imgui/imgui_impl_opengl3.cpp
+            ${INCLUDE_DIR}/imgui/imgui.cpp
+            ${INCLUDE_DIR}/imgui/imgui_tables.cpp
+            ${INCLUDE_DIR}/imgui/imgui_widgets.cpp
+            ${INCLUDE_DIR}/imgui/imgui_draw.cpp)
 target_link_libraries(ImGui_GLFW ${glfw3_LIBRARIES})
 
 add_executable(Pointcloud_Visualizer ${SRC_DIR}/main.cc 
