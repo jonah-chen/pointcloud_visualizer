@@ -50,7 +50,8 @@ void HUD::configure()
     ImGui::Text("LShift  - down");
     ImGui::Text("LCtrl   - sprint");
     ImGui::Text("R       - force re-sort points");
-    ImGui::Text("Esc     - toggle cursor mode");
+    ImGui::Text("LMB/RMB - toggle cursor mode");
+    ImGui::Text("Esc     - quit");
     ImGui::End();
 
     if (!masks_.empty())

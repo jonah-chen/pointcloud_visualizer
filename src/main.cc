@@ -91,17 +91,16 @@ int main(int argc, char** argv)
         prev_inputs = inputs;
         glfwPollEvents();
         inputs = user_inputs::fetch(window);
-        execute_movement(camera, inputs, prev_inputs, Renderer::FPS);
         
-        if (K_ESC(inputs) && !K_ESC(prev_inputs))
-        {
-            // find cursor mode
-            auto cursor_mode = glfwGetInputMode(window, GLFW_CURSOR);
-            if (cursor_mode == GLFW_CURSOR_DISABLED)
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            else
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        }
+        if (LMB(inputs) && !LMB(prev_inputs))
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        else if (RMB(inputs) && !RMB(prev_inputs))
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else
+            execute_movement(camera, inputs, prev_inputs, Renderer::FPS);
+        
+        if (K_ESC(inputs))
+            break;
 
         mask_updated = false;
         for (size_t i = 0; i < masks.size(); ++i)
