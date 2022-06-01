@@ -53,5 +53,3 @@ void Camera::translate(float fwd, float right, float up)
     if (pos_.y < ground_level)
         pos_.y = ground_level;
 }
-
-
