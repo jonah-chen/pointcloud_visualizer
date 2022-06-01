@@ -69,10 +69,15 @@ int main(int argc, char** argv)
 
     std::future<PointCloud> buf_sorted;
     std::vector<Mask> masks;
+    std::vector<bool> masks_applied;
+    bool mask_updated;
+    for (const auto &mask : masks)
+        masks_applied.push_back(mask.active);
 
     user_inputs inputs, prev_inputs;
-    PointCloud cloud = load(args["pointcloud"], camera.pos(), 
+    PointCloud og_cloud = load(args["pointcloud"], camera.pos(), 
         args.find("yz") == args.end());
+    PointCloud cloud = og_cloud; // make a copy of original order for masking purposes
     
     if (args.find("mask") != args.end())
         masks = load_masks(args["mask"]);
@@ -98,7 +103,25 @@ int main(int argc, char** argv)
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
 
-        if (K_R(inputs))
+        mask_updated = false;
+        for (size_t i = 0; i < masks.size(); ++i)
+        {
+            if (masks[i] != masks_applied[i])
+            {
+                mask_updated = true;
+                masks_applied[i] = masks[i].active;
+            }
+        }
+        if (mask_updated)
+        {
+            cloud = og_cloud;
+            for (auto &mask : masks)
+            {
+                if (mask)
+                    mask.apply(cloud);
+            }
+        }
+        if (K_R(inputs) || mask_updated)
         {
             update(cloud, camera.pos());
             resort(cloud);
@@ -109,9 +132,11 @@ int main(int argc, char** argv)
             age++;
             if (!buf_sorted.valid())
             {
-                buf_sorted = std::async(std::launch::async, update_resort_async, cloud, camera.pos());
+                buf_sorted = std::async(std::launch::async, update_resort_async,
+                    cloud, camera.pos());
             }
-            else if (buf_sorted.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+            else if (buf_sorted.wait_for(std::chrono::seconds(0)) 
+                == std::future_status::ready)
             {
                 cloud = buf_sorted.get();
                 age = 0;

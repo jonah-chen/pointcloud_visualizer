@@ -8,7 +8,14 @@ struct Mask
     std::vector<bool> mask;
     glm::vec3 color;
     std::string cls;
-    bool active { false }; 
+    bool active { false };
+
+    inline bool operator==(bool other_active) const
+    { return active == other_active; }
+    inline bool operator!=(bool other_active) const
+    { return active != other_active; }
+
+    operator bool() const { return active; }
 
     Mask(const std::string &filename, const glm::vec3 &color, const std::string &cls);
     void apply(PointCloud &points);

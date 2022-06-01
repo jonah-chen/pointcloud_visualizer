@@ -39,8 +39,10 @@ void HUD::configure()
     ImGui::Separator();
 
     ImGui::SliderFloat("Ground", &camera_.ground_level, -3.f, 3.f);
-    ImGui::SliderFloat("Point Size @1m", point_size_1m_ptr_, 1.f, 64.f, "%.1f", ImGuiSliderFlags_Logarithmic);
-    ImGui::SliderFloat("Max Point Size Distance (cm)" , max_point_size_dist_ptr_, 10.f, 200.f);
+    ImGui::SliderFloat("Point Size @1m", point_size_1m_ptr_, 1.f, 64.f, "%.1f", 
+        ImGuiSliderFlags_Logarithmic);
+    ImGui::SliderFloat("Max Point Size Distance (cm)" , 
+        max_point_size_dist_ptr_, 10.f, 200.f, "%.1f", ImGuiSliderFlags_Logarithmic);
     ImGui::Separator();
 
     ImGui::Text("W/A/S/D - move");
@@ -51,7 +53,16 @@ void HUD::configure()
     ImGui::Text("Esc     - toggle cursor mode");
     ImGui::End();
 
-    ImGui::Begin("Masks");
+    if (!masks_.empty())
+    {
+        ImGui::Begin("Masks");
+        for (auto &mask : masks_)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(mask.color.x, mask.color.y, mask.color.z, 1.0f));
+            ImGui::Checkbox(mask.cls.c_str(), &mask.active);
+        }
+        ImGui::End();
+    }
 }
 
 void HUD::render()

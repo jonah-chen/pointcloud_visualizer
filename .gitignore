@@ -3,3 +3,6 @@
 /CMakeCache.txt
 /cmake_install.cmake
 /CMakeFiles/
+*.a
+*.so
+*.ini
