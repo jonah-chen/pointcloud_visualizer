@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 project(Pointcloud_Visualizer)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -24,7 +24,7 @@ add_library(ImGui_GLFW STATIC ${INCLUDE_DIR}/imgui_impl_glfw.cpp ${INCLUDE_DIR}/
 target_link_libraries(ImGui_GLFW ${glfw3_LIBRARIES} imgui)
 
 
-add_executable(Pointcloud_Visualizer main.cc 
+add_executable(Pointcloud_Visualizer ${SRC_DIR}/main.cc 
                 ${SRC_DIR}/camera.cc
                 ${SRC_DIR}/points.cc
                 ${SRC_DIR}/renderer.cc
