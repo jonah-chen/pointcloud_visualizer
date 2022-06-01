@@ -18,7 +18,10 @@ PointCloud load(const std::string &filename,
         pcl::io::loadPCDFile(filename, *cloud);
     else
         throw std::runtime_error("load: unknown file extension");
-    
+
+    if (!cloud || cloud->points.empty())
+        throw std::runtime_error("load: cannot load point cloud");
+
     PointCloud points;
     points.reserve(cloud->size());
     for (const auto &pt : *cloud)
