@@ -1,7 +1,7 @@
 
 #include "input.hpp"
 
-constexpr float mouse_sensitivity = 0.027f;
+constexpr float mouse_sensitivity = 0.064f;
 constexpr float sprint_speed = 10.0f;
 constexpr float walk_speed = 2.0f;
 
@@ -47,7 +47,6 @@ execute_movement(Camera &camera,
 {
 	const float frame_time = 1.0f / fps;
 	// the mouse controls the rotation of the camera
-	constexpr float mouse_sensitivity = 0.027f;
 	float velocity = K_LCTRL(inputs) ? sprint_speed: walk_speed;
 
 	const double minus_mouse_delta_x = (XPOS(last_inputs) - XPOS(inputs));

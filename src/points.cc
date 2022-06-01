@@ -81,6 +81,7 @@ void resort(PointCloud &points)
 PointCloud update_async(const PointCloud &points, const glm::vec3 &camera_pos)
 {
     PointCloud new_points(points);
+#pragma omp parallel for
     for (auto &pt : new_points)
         pt.update(camera_pos);
     return new_points;
