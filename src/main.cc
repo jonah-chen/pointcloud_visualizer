@@ -66,8 +66,7 @@ int main(int argc, char** argv)
     for (const auto &mask : masks)
         masks_applied.push_back(mask.active);
 
-    GLFWwindow *window;
-    Renderer renderer(&window, args.find("windowed") == args.end());
+    Renderer renderer(args.find("windowed") == args.end());
     Camera camera(
         centroid(og_cloud),                                     // position
         glm::vec3(0.0f, 0.0f, 1.0f),                            // forward
@@ -78,7 +77,7 @@ int main(int argc, char** argv)
         20.0f,                                                  // far plane
         0.0f                                                    // ground plane
     );
-    HUD hud(window, camera, age, renderer, masks);
+    HUD hud(renderer.window(), camera, age, renderer, masks);
     user_inputs inputs, prev_inputs;
     bool to_move = false;
 
@@ -86,11 +85,11 @@ int main(int argc, char** argv)
     resort(cloud);
 
     // Main loop
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(renderer.window()))
     {
         prev_inputs = inputs;
         glfwPollEvents();
-        inputs = user_inputs::fetch(window);
+        inputs = user_inputs::fetch(renderer.window());
 
         if (to_move)
             execute_movement(camera, inputs, prev_inputs, ImGui::GetIO().Framerate);
@@ -99,12 +98,11 @@ int main(int argc, char** argv)
 
         if (LMB(inputs) && !LMB(prev_inputs))
         {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            renderer.enable_cursor();
             to_move = false;
         }
         else if (RMB(inputs) && !RMB(prev_inputs))
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        
+            renderer.disable_cursor();        
         if (K_ESC(inputs))
             break;
 
@@ -158,7 +156,7 @@ int main(int argc, char** argv)
         renderer.draw(cloud.data(), cloud.size(), camera);
         hud.render();
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(renderer.window());
     }
     
     return 0;

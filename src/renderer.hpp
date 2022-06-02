@@ -24,7 +24,7 @@ public:
     float max_point_size_dist = 60.0f;
 
 public:
-    Renderer(GLFWwindow **window, bool fullscreen = true);
+    Renderer(bool fullscreen = true);
     ~Renderer();
 
     /**
@@ -48,11 +48,19 @@ public:
      */
     void draw(const Camera &camera);
 
+    /**
+     * Functions to control the cursor state
+     */
+    inline void disable_cursor() { glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
+    inline void enable_cursor() { glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
+
 public:
+    inline GLFWwindow *window() const { return window_; }
     constexpr int width() const { return width_; }
     constexpr int height() const { return height_; }
 
 private:
+    GLFWwindow *window_;
     GLuint vao_, vbo_, ebo_;
     GLuint shader_;
 

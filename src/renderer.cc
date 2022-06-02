@@ -34,7 +34,7 @@ debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
 
 #endif
 
-Renderer::Renderer(GLFWwindow **window, bool fullscreen)
+Renderer::Renderer(bool fullscreen)
 {
     if (!glfwInit())
         throw std::runtime_error("Failed to initialize GLFW");
@@ -70,17 +70,19 @@ Renderer::Renderer(GLFWwindow **window, bool fullscreen)
         }
     }
     
-    *window = glfwCreateWindow(width_, height_, "Pointcloud Visualizer", monitor, nullptr);
-    if (*window == nullptr)
+    window_ = glfwCreateWindow(width_, height_, 
+        "Pointcloud Visualizer", monitor, nullptr);
+
+    if (window_ == nullptr)
     {
         glfwTerminate();
         throw std::runtime_error("Failed to create GLFW window");
     }
-    glfwMakeContextCurrent(*window);
+    glfwMakeContextCurrent(window_);
     glfwSwapInterval(1);
     
 	// disable cursor
-	glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (glewInit() != GLEW_OK)
         throw std::runtime_error("Failed to initialize GLEW");
@@ -150,6 +152,7 @@ Renderer::~Renderer()
     glDeleteBuffers(1, &ebo_);
     glDeleteVertexArrays(1, &vao_);
     glDeleteProgram(shader_);
+    glfwDestroyWindow(window_);
     glfwTerminate();
 }
 

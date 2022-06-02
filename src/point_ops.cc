@@ -66,19 +66,22 @@ std::vector<Mask> load_masks(const std::string &filename)
     if (_i != std::string::npos)
         fileroot = filename.substr(0, _i + 1);
 
-    while (ifs.peek() != EOF)
+    while (ifs.good())
     {
         std::string fn;
         std::string cls;
         std::string hex;
         ifs >> fn >> hex >> cls;
-    
+        if (ifs.eof())
+            break;
+        
         uint8_t r = std::stoi(hex.substr(0, 2), nullptr, 16);
         uint8_t g = std::stoi(hex.substr(2, 2), nullptr, 16);
         uint8_t b = std::stoi(hex.substr(4, 2), nullptr, 16);
         glm::vec3 color(r / 255.0f, g / 255.0f, b / 255.0f);
-
+        
         masks.emplace_back(fileroot + fn, color, cls);
+
     }
     return masks;
 }

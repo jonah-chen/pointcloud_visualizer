@@ -57,10 +57,14 @@ void HUD::configure()
     if (!masks_.empty())
     {
         ImGui::Begin("Masks");
-        for (auto &mask : masks_)
+        for (int i = 0; i < masks_.size(); ++i)
         {
-            // ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(mask.color.x, mask.color.y, mask.color.z, 1.0f));
-            ImGui::Checkbox(mask.cls.c_str(), &mask.active);
+            auto &mask = masks_[i];
+            ImGui::Checkbox((std::to_string(i) + ": ").c_str(), &mask.active);
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(
+                mask.color.x, mask.color.y, mask.color.z, 1.0f), "%s", 
+                mask.cls.c_str());
         }
         ImGui::End();
     }
