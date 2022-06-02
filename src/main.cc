@@ -80,6 +80,7 @@ int main(int argc, char** argv)
     );
     HUD hud(window, camera, age, renderer, masks);
     user_inputs inputs, prev_inputs;
+    bool to_move = true;
 
     update(cloud, camera.pos());
     resort(cloud);
@@ -91,12 +92,18 @@ int main(int argc, char** argv)
         glfwPollEvents();
         inputs = user_inputs::fetch(window);
 
+        if (to_move)
+            execute_movement(camera, inputs, prev_inputs, Renderer::FPS);
+        else
+            to_move = true;
+
         if (LMB(inputs) && !LMB(prev_inputs))
+        {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            to_move = false;
+        }
         else if (RMB(inputs) && !RMB(prev_inputs))
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        else
-            execute_movement(camera, inputs, prev_inputs, Renderer::FPS);
         
         if (K_ESC(inputs))
             break;
