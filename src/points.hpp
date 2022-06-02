@@ -31,8 +31,9 @@ struct XYZRGBD
     XYZRGBD();
     XYZRGBD(const XYZRGBD &pt) = default;
 
-    XYZRGBD(const pcl::PointXYZRGB &pt);
-    XYZRGBD(const pcl::PointXYZRGB &pt, float d);
+    XYZRGBD(const pcl::PointXYZRGB &pt, bool exchange_yz=false, 
+            float d=std::numeric_limits<float>::infinity());
+
     XYZRGBD(const pcl::PointXYZRGB &pt, const glm::vec3 &camera_pos, bool exchange_yz=false);
 
     /**
@@ -57,7 +58,7 @@ using PointCloud = std::vector<XYZRGBD>;
  * @param exchange_xz flag to specify if the x and z axes are exchanged.
  * @return PointCloud the loaded point cloud.
  */
-PointCloud load(const std::string &filename, const glm::vec3 &camera_pos, bool exchange_xz);
+PointCloud load(const std::string &filename, bool exchange_xz);
 
 /**
  * Update the distance of each point in the point cloud with respect to the

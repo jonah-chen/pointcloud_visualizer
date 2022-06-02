@@ -54,3 +54,20 @@ std::vector<Mask> load_masks(const std::string &filename);
  * @return BBox the tight bounding box of the mask.
  */
 BBox tightest_bbox(const PointCloud &points, const Mask &mask);
+
+/**
+ * Find the center of a given point cloud.
+ * 
+ * @param points point cloud to find the center of.
+ * @return glm::vec3 the center of the point cloud.
+ */
+glm::vec3 centroid(const PointCloud &points);
+
+/**
+ * Find the center of a given object in the scene.
+ * 
+ * @param points point cloud of the scene.
+ * @param mask mask of the object to find the center of.
+ * @return glm::vec3 the center of the object.
+ */
+glm::vec3 centroid(const PointCloud &points, const Mask &mask);

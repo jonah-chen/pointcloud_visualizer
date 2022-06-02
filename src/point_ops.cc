@@ -111,3 +111,27 @@ BBox tightest_bbox(const PointCloud &points, const Mask &mask)
 
     return bbox;
 }
+
+glm::vec3 centroid(const PointCloud &points)
+{
+    glm::dvec3 c;
+    for (auto &p : points)
+        c += p.xyz;
+    return c / static_cast<double>(points.size());
+}
+
+
+glm::vec3 centroid(const PointCloud &points, const Mask &mask)
+{
+    glm::dvec3 c;
+    int count = 0;
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+        if (mask.mask[i])
+        {
+            c += points[i].xyz;
+            ++count;
+        }
+    }
+    return c / static_cast<double>(count);
+}

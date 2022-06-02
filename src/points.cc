@@ -7,9 +7,7 @@
 #include <cstring>
 #include <limits>
 
-PointCloud load(const std::string &filename, 
-                          const glm::vec3 &camera_pos,
-                          bool exchange_xz)
+PointCloud load(const std::string &filename, bool exchange_xz)
 {
     pcl_PointCloud::Ptr cloud ( new pcl_PointCloud );
     if (filename.substr(filename.find_last_of(".") + 1) == "ply")
@@ -25,8 +23,7 @@ PointCloud load(const std::string &filename,
     PointCloud points;
     points.reserve(cloud->size());
     for (const auto &pt : *cloud)
-        points.emplace_back(pt, camera_pos, exchange_xz);
-    std::sort(points.begin(), points.end(), std::greater<XYZRGBD>());
+        points.emplace_back(pt, exchange_xz);
     return points;
 }
 
@@ -35,29 +32,17 @@ XYZRGBD::XYZRGBD()
     memset(this, 0, sizeof(XYZRGBD));
 }
 
-XYZRGBD::XYZRGBD(const pcl::PointXYZRGB &pt)
+XYZRGBD::XYZRGBD(const pcl::PointXYZRGB &pt, bool exchange_yz, float d)
 {
-    xyz = glm::vec3(pt.x, pt.y, pt.z);
-    rgb = glm::vec3(pt.r, pt.g, pt.b) / 255.0f;
-    d_sq = std::numeric_limits<float>::infinity();
-}
-
-XYZRGBD::XYZRGBD(const pcl::PointXYZRGB &pt, float d)
-{
-    xyz = glm::vec3(pt.x, pt.y, pt.z);
+    xyz = exchange_yz ? glm::vec3(pt.x, pt.z, -pt.y) : glm::vec3(pt.x, pt.y, pt.z);
     rgb = glm::vec3(pt.r, pt.g, pt.b) / 255.0f;
     d_sq = d * d;
 }
 
 XYZRGBD::XYZRGBD(const pcl::PointXYZRGB &pt, const glm::vec3 &camera_pos, bool exchange_yz)
 {
-    if (exchange_yz)
-        xyz = glm::vec3(pt.x, pt.z, -pt.y);
-    else
-        xyz = glm::vec3(pt.x, pt.y, pt.z);
-
+    xyz = exchange_yz ? glm::vec3(pt.x, pt.z, -pt.y) : glm::vec3(pt.x, pt.y, pt.z);
     rgb = glm::vec3(pt.r, pt.g, pt.b) / 255.0f;
-    
     d_sq = glm::distance2(xyz, camera_pos);
 }
 

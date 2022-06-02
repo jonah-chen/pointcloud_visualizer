@@ -54,13 +54,23 @@ int main(int argc, char** argv)
 {
     auto args = parse_args(argc, argv);
 
-    std::vector<std::future<PointCloud>> garbage;
+    std::future<PointCloud> buf_sorted;
+    std::vector<Mask> masks;
+    std::vector<bool> masks_applied;
+    bool mask_updated;
+    const PointCloud og_cloud = load(args["pointcloud"], args.find("yz") == args.end());
+
+    PointCloud cloud = og_cloud; // make a copy of original order for masking purposes
+    if (args.find("masks") != args.end())
+        masks = load_masks(args["masks"]);
+    for (const auto &mask : masks)
+        masks_applied.push_back(mask.active);
 
     GLFWwindow *window;
     Renderer renderer(&window, args.find("windowed") == args.end());
     Camera camera(
-        glm::vec3(0.0f, 0.0f, 0.0f),                            // position
-        glm::vec3(0.0f, 0.0f, -1.0f),                           // forward
+        centroid(og_cloud),                                     // position
+        glm::vec3(0.0f, 0.0f, 1.0f),                            // forward
         glm::vec3(0.0f, 1.0f, 0.0f),                            // up
         1.2f,                                                   // fov
         (float) renderer.width() / (float) renderer.height(),   // aspect
@@ -68,25 +78,11 @@ int main(int argc, char** argv)
         20.0f,                                                  // far plane
         0.0f                                                    // ground plane
     );
-
-    std::future<PointCloud> buf_sorted;
-    std::vector<Mask> masks;
-    std::vector<bool> masks_applied;
-    bool mask_updated;
-
-    user_inputs inputs, prev_inputs;
-    PointCloud og_cloud = load(args["pointcloud"], camera.pos(), 
-        args.find("yz") == args.end());
-    PointCloud cloud = og_cloud; // make a copy of original order for masking purposes
-    
-    if (args.find("masks") != args.end())
-        masks = load_masks(args["masks"]);
-    
-    for (const auto &mask : masks)
-        masks_applied.push_back(mask.active);
-      
     HUD hud(window, camera, age, renderer, masks);
+    user_inputs inputs, prev_inputs;
 
+    update(cloud, camera.pos());
+    resort(cloud);
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -94,7 +90,7 @@ int main(int argc, char** argv)
         prev_inputs = inputs;
         glfwPollEvents();
         inputs = user_inputs::fetch(window);
-        
+
         if (LMB(inputs) && !LMB(prev_inputs))
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         else if (RMB(inputs) && !RMB(prev_inputs))
@@ -122,7 +118,6 @@ int main(int argc, char** argv)
                 if (mask)
                     mask.apply(cloud);
             }
-            garbage.push_back(std::move(buf_sorted));
             buf_sorted = std::async(std::launch::async, update_resort_async, 
                 cloud, camera.pos());
         }
@@ -158,9 +153,6 @@ int main(int argc, char** argv)
 
         glfwSwapBuffers(window);
     }
-
-    for (auto &fut : garbage)
-        fut.wait();
     
     return 0;
 }
