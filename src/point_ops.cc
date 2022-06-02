@@ -40,6 +40,14 @@ Mask::Mask(const std::string &filename, const glm::vec3 &color, const std::strin
     }
 }
 
+Mask::Mask(Mask &&other)
+{
+    mask = std::move(other.mask);
+    color = other.color;
+    cls = other.cls;
+    active = other.active;
+}
+
 void Mask::apply(PointCloud &points)
 {
     if (points.size() != mask.size())
@@ -117,7 +125,7 @@ BBox tightest_bbox(const PointCloud &points, const Mask &mask)
 
 glm::vec3 centroid(const PointCloud &points)
 {
-    glm::dvec3 c;
+    glm::dvec3 c(0.0);
     for (auto &p : points)
         c += p.xyz;
     return c / static_cast<double>(points.size());
@@ -126,7 +134,7 @@ glm::vec3 centroid(const PointCloud &points)
 
 glm::vec3 centroid(const PointCloud &points, const Mask &mask)
 {
-    glm::dvec3 c;
+    glm::dvec3 c(0.0);
     int count = 0;
     for (size_t i = 0; i < points.size(); ++i)
     {

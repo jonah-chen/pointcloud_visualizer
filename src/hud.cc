@@ -66,6 +66,18 @@ void HUD::configure()
                 mask.color.x, mask.color.y, mask.color.z, 1.0f), "%s", 
                 mask.cls.c_str());
         }
+
+        if (ImGui::Button("Show All"))
+        {
+            for (auto &mask : masks_)
+                mask.active = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Hide All"))
+        {
+            for (auto &mask : masks_)
+                mask.active = false;
+        }
         ImGui::End();
     }
 }

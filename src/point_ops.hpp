@@ -19,6 +19,8 @@ struct Mask
 
     Mask(const std::string &filename, const glm::vec3 &color, const std::string &cls);
 
+    Mask(Mask &&other);
+
     /**
      * Apply the mask to the given point cloud.
      * 
