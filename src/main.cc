@@ -61,11 +61,23 @@ int main(int argc, char** argv)
     const PointCloud og_cloud = load(args["pointcloud"], args.find("yz") == args.end());
 
     PointCloud cloud = og_cloud; // make a copy of original order for masking purposes
+    float ground_level = 0.0f;
+
     if (args.find("masks") != args.end())
+    {
         masks = load_masks(args["masks"]);
+        auto floor_mask = std::find_if(masks.begin(), masks.end(), 
+        [](const Mask &mask) { return mask.cls == "floor"; });
+        if (floor_mask != masks.end())
+        {
+            auto center = centroid(cloud, *floor_mask);
+            ground_level = center.y + Camera::EYE_HEIGHT;
+        }
+    }
     for (const auto &mask : masks)
         masks_applied.push_back(mask.active);
-
+    
+    
     Renderer renderer(args.find("windowed") == args.end());
     Camera camera(
         centroid(og_cloud),                                     // position
@@ -74,9 +86,11 @@ int main(int argc, char** argv)
         1.2f,                                                   // fov
         (float) renderer.width() / (float) renderer.height(),   // aspect
         0.1f,                                                   // near plane
-        20.0f,                                                  // far plane
-        0.0f                                                    // ground plane
+        200.0f,                                                 // far plane
+        ground_level                                            // ground plane
     );
+
+
     HUD hud(renderer.window(), camera, age, renderer, masks);
     user_inputs inputs, prev_inputs;
     bool to_move = false;
@@ -125,6 +139,8 @@ int main(int argc, char** argv)
 
             buf_sorted = std::async(std::launch::async, update_resort_async, 
                 cloud, camera.pos());
+            
+            to_move = false;
         }
         if (K_R(inputs) || mask_updated)
         {

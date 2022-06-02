@@ -46,6 +46,8 @@ private:
 public:
     float ground_level;        // ground level
 
+    constexpr static float EYE_HEIGHT = 1.4f;
+
 public:
     constexpr glm::vec3 pos() const { return pos_; }
     constexpr glm::vec3 fwd() const { return fwd_; }

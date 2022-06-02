@@ -23,4 +23,5 @@ private:
     float *point_size_1m_ptr_, *max_point_size_dist_ptr_;
     unsigned int &age_;
     std::vector<Mask> &masks_;
+    float default_ground_level_;
 };

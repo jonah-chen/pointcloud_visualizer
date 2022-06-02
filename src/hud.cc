@@ -3,7 +3,10 @@
 
 HUD::HUD(GLFWwindow *window, Camera &camera, unsigned int &age, 
          Renderer &renderer, std::vector<Mask> &masks)
-    : camera_(camera), age_(age), masks_(masks)
+    : camera_(camera),
+        age_(age),
+        masks_(masks), 
+        default_ground_level_(camera.ground_level)
 {
     point_size_1m_ptr_ = &(renderer.point_size_1m);
     max_point_size_dist_ptr_ = &(renderer.max_point_size_dist);
@@ -38,7 +41,8 @@ void HUD::configure()
         1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::Separator();
 
-    ImGui::SliderFloat("Ground", &camera_.ground_level, -3.f, 3.f);
+    ImGui::SliderFloat("Ground", &camera_.ground_level, 
+        default_ground_level_ - 2.0f, default_ground_level_ + 2.0f);
     ImGui::SliderFloat("Point Size @1m", point_size_1m_ptr_, 1.f, 64.f, "%.1f", 
         ImGuiSliderFlags_Logarithmic);
     ImGui::SliderFloat("Max Point Size Distance (cm)" , 
