@@ -118,11 +118,11 @@ int main(int argc, char** argv)
         if (mask_updated)
         {
             cloud = og_cloud;
-            for (auto &mask : masks)
-            {
-                if (mask)
-                    mask.apply(cloud);
-            }
+            // apply the masks in the opposite order
+            for (auto msk_it = masks.rbegin(); msk_it != masks.rend(); ++msk_it)
+                if (msk_it->active)
+                    msk_it->apply(cloud);
+
             buf_sorted = std::async(std::launch::async, update_resort_async, 
                 cloud, camera.pos());
         }
