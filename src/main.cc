@@ -80,7 +80,7 @@ int main(int argc, char** argv)
     );
     HUD hud(window, camera, age, renderer, masks);
     user_inputs inputs, prev_inputs;
-    bool to_move = true;
+    bool to_move = false;
 
     update(cloud, camera.pos());
     resort(cloud);
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
         inputs = user_inputs::fetch(window);
 
         if (to_move)
-            execute_movement(camera, inputs, prev_inputs, Renderer::FPS);
+            execute_movement(camera, inputs, prev_inputs, ImGui::GetIO().Framerate);
         else
             to_move = true;
 
