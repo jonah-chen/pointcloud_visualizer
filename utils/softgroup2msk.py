@@ -8,7 +8,11 @@ import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser(description='Convert softgroup output to msk format')
 parser.add_argument('input', help='Input softgroup file')
-input_path = parser.parse_args().input
+parser.add_argument('--max-instances', type=int, default=50, 
+    help='Maximum number of instances to show, default 50')
+
+args = parser.parse_args()
+input_path = args.input
 output_path = input_path.replace('.txt', '.msk')
 
 class Instance:
@@ -30,6 +34,10 @@ with open(input_path, 'r') as f:
     
 instances = [Instance(line) for line in lines]
 instances = sorted([i for i in instances if i.confidence > THRESH])[::-1]
+
+if (len(instances) > args.max_instances):
+    instances = instances[:args.max_instances]
+    print(f'Only showing {args.max_instances} instances')
 
 # jet color map
 cmap = plt.get_cmap('jet')
