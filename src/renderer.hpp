@@ -7,13 +7,14 @@
 #include "points.hpp"
 #include "camera.hpp"
 
-class Renderer
+GLFWwindow *init_window(bool fullscreen=true);
+GLuint compile_shader(const char *vertex, const char *fragment);
+
+
+class PointRenderer
 {
 public:
     using vertex_type = XYZRGBD;
-
-    constexpr static int OPENGL_VERSION_MAJOR = 4;
-    constexpr static int OPENGL_VERSION_MINOR = 5;
 
     constexpr static size_t MAX_PTS = (1u << 24);
     constexpr static size_t POINT_SIZE = sizeof(vertex_type);
@@ -24,8 +25,8 @@ public:
     float max_point_size_dist = 60.0f;
 
 public:
-    Renderer(bool fullscreen = true);
-    ~Renderer();
+    PointRenderer(bool fullscreen = true);
+    ~PointRenderer();
 
     /**
      * Draws one frame from a particular perspective. All buffers and programs
@@ -37,16 +38,6 @@ public:
      * @param camera camera to use for the perspective.
      */
     void draw(const void *pts, const size_t n, const Camera &camera);
-
-    /**
-     * Draw one frame without changing the scene or sorting of the point.
-     * 
-     * @warning this should only be used for small movements otherwise it can
-     * lead to inaccurate renders.
-     * 
-     * @param camera camera to use for the perspective.
-     */
-    void draw(const Camera &camera);
 
     /**
      * Functions to control the cursor state
@@ -74,7 +65,7 @@ private:
     int width_ = 1600, height_ = 1200;
 
 private:
-    const char *vertex_shader = R"(
+    const char *v_src = R"(
         #version 450 core
         layout(location = 0) in vec3 aPos;
         layout(location = 1) in vec3 aColor;
@@ -94,7 +85,7 @@ private:
             ourColor = aColor;
         }
     )";
-    const char *fragment_shader = R"(
+    const char *f_src = R"(
         #version 450 core
         in vec3 ourColor;
         out vec4 color;
@@ -103,4 +94,9 @@ private:
             color = vec4(ourColor, 1.0);
         }
     )";
+};
+
+class MeshRenderer
+{
+
 };
