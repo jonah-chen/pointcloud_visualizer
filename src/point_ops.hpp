@@ -2,6 +2,7 @@
 #pragma once
 
 #include "points.hpp"
+#include "mesh.hpp"
 
 struct Mask
 {
@@ -28,6 +29,8 @@ struct Mask
      * @note the point cloud must have the same number of points as the mask.
      */
     void apply(PointCloud &points);
+
+    void apply(o3d_PointCloud &points);
 };
 
 struct BBox

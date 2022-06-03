@@ -15,6 +15,20 @@ set(SRC_DIR src)
 set(INCLUDE_DIR include)
 set(LIB_DIR lib)
 
+set(Point_Dependencies OpenGL
+                       glfw
+                       GLEW
+                       ${PCL_LIBRARIES}
+                       ImGui_GLFW
+                       OpenMP::OpenMP_CXX)
+
+set(Point_Src ${SRC_DIR}/camera.cc
+              ${SRC_DIR}/points.cc
+              ${SRC_DIR}/renderer.cc
+              ${SRC_DIR}/input.cc
+              ${SRC_DIR}/point_ops.cc
+              ${SRC_DIR}/hud.cc)
+
 include_directories(${SRC_DIR} 
                     ${INCLUDE_DIR}
                     ${INCLUDE_DIR}/imgui
@@ -34,22 +48,13 @@ add_library(ImGui_GLFW STATIC
 target_link_libraries(ImGui_GLFW ${glfw3_LIBRARIES})
 
 
-add_executable(Pointcloud_Visualizer ${SRC_DIR}/main.cc 
-                ${SRC_DIR}/camera.cc
-                ${SRC_DIR}/points.cc
-                ${SRC_DIR}/renderer.cc
-                ${SRC_DIR}/input.cc
-                ${SRC_DIR}/point_ops.cc
-                ${SRC_DIR}/hud.cc
-                ${SRC_DIR}/point_renderer.cc)
-target_link_libraries(Pointcloud_Visualizer PUBLIC 
-                        OpenGL
-                        glfw
-                        GLEW
-                        ${PCL_LIBRARIES}
-                        ImGui_GLFW
-                        OpenMP::OpenMP_CXX
-                        Open3D)
+add_executable(Pointcloud_Visualizer ${SRC_DIR}/pointcloud_visualizer.cc ${Point_Src})
+target_link_libraries(Pointcloud_Visualizer PUBLIC ${Point_Dependencies})
+
+add_executable(Meshed_Visualizer ${SRC_DIR}/meshed_visualizer.cc 
+                                ${Point_Src}
+                                ${SRC_DIR}/mesh.cc)
+target_link_libraries(Meshed_Visualizer PUBLIC ${Point_Dependencies} Open3D)
 
 add_executable(BPA utils/bpa.cc)
 target_link_libraries(BPA PUBLIC Open3D pthread)

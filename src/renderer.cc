@@ -7,6 +7,9 @@
 #include <numeric>
 #include <glm/gtc/type_ptr.hpp>
 
+constexpr int OPENGL_VERSION_MAJOR = 4;
+constexpr int OPENGL_VERSION_MINOR = 5;
+
 #ifndef NDEBUG
 
 static void APIENTRY
@@ -34,7 +37,7 @@ debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
 
 #endif
 
-Renderer::Renderer(bool fullscreen)
+GLFWwindow *init_window(bool fullscreen)
 {
     if (!glfwInit())
         throw std::runtime_error("Failed to initialize GLFW");
@@ -43,50 +46,78 @@ Renderer::Renderer(bool fullscreen)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_VERSION_MINOR);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    glfwWindowHint(GLFW_REFRESH_RATE, FPS);
 
     GLFWmonitor *monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-    width_ = mode->width;
-    height_ = mode->height;
+    int width = mode->width;
+    int height = mode->height;
 
     if (!fullscreen)
     {
         monitor = nullptr;
-        switch(height_)
+        switch(height)
         {
         case 150 ... 300:
-            width_ = 200; height_ = 150; break;
+            width = 200; height = 150; break;
         case 301 ... 600:
-            width_ = 400; height_ = 300; break;
+            width = 400; height = 300; break;
         case 601 ... 1200:
-            width_ = 800; height_ = 600; break;
+            width = 800; height = 600; break;
         case 1201 ... 2400:
-            width_ = 1600; height_ = 1200; break;
+            width = 1600; height = 1200; break;
         case 2401 ... 4800:
-            width_ = 3200; height_ = 2400; break;
+            width = 3200; height = 2400; break;
         default:
             throw std::runtime_error("Window size not supported. Please use fullscreen mode.");
         }
     }
     
-    window_ = glfwCreateWindow(width_, height_, 
+    GLFWwindow *window = glfwCreateWindow(width, height, 
         "Pointcloud Visualizer", monitor, nullptr);
 
-    if (window_ == nullptr)
+    if (window == nullptr)
     {
         glfwTerminate();
         throw std::runtime_error("Failed to create GLFW window");
     }
-    glfwMakeContextCurrent(window_);
+    glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
     
 	// disable cursor
-	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (glewInit() != GLEW_OK)
         throw std::runtime_error("Failed to initialize GLEW");
-    
+
+    return window;
+}
+
+GLuint compule_shader(const char *vertex, const char *fragment)
+{
+    GLuint shader = glCreateProgram();
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(vertexShader, 1, &vertex, nullptr);
+    glCompileShader(vertexShader);
+    glShaderSource(fragmentShader, 1, &fragment, nullptr);
+    glCompileShader(fragmentShader);
+
+    glAttachShader(shader, vertexShader);
+    glAttachShader(shader, fragmentShader);
+    glLinkProgram(shader);
+    glValidateProgram(shader);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    glUseProgram(shader);
+    return shader;
+}
+
+PointRenderer::PointRenderer(bool fullscreen)
+{
+    window_ = init_window(fullscreen);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
 #ifndef NDEBUG
@@ -122,31 +153,15 @@ Renderer::Renderer(bool fullscreen)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_PTS * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
-    shader_ = glCreateProgram();
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    shader_ = compule_shader(v_src, f_src);
 
-    glShaderSource(vertexShader, 1, &vertex_shader, nullptr);
-    glCompileShader(vertexShader);
-    glShaderSource(fragmentShader, 1, &fragment_shader, nullptr);
-    glCompileShader(fragmentShader);
-
-    glAttachShader(shader_, vertexShader);
-    glAttachShader(shader_, fragmentShader);
-    glLinkProgram(shader_);
-    glValidateProgram(shader_);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    glUseProgram(shader_);
     view_proj_loc_ = glGetUniformLocation(shader_, "view_proj");
     max_point_size_loc_ = glGetUniformLocation(shader_, "max_point_size");
     point_size_1m_loc_ = glGetUniformLocation(shader_, "point_size_1m");
     camera_pos_loc_ = glGetUniformLocation(shader_, "camera_pos");
 }
 
-Renderer::~Renderer()
+PointRenderer::~PointRenderer()
 {
     glDeleteBuffers(1, &vbo_);
     glDeleteBuffers(1, &ebo_);
@@ -156,7 +171,7 @@ Renderer::~Renderer()
     glfwTerminate();
 }
 
-void Renderer::draw(const void *pts, const size_t n, const Camera &camera)
+void PointRenderer::draw(const void *pts, const size_t n, const Camera &camera)
 {
     if (n > MAX_PTS)
         throw std::runtime_error("Too many points of " + std::to_string(n) + " to draw");
@@ -165,11 +180,6 @@ void Renderer::draw(const void *pts, const size_t n, const Camera &camera)
     glBufferSubData(GL_ARRAY_BUFFER, 0, buffered_points_ * POINT_SIZE, pts);
     glUniform1f(point_size_1m_loc_, point_size_1m);
     glUniform1f(max_point_size_loc_, 1e4f /(max_point_size_dist * max_point_size_dist));
-    draw(camera);
-}
-
-void Renderer::draw(const Camera &camera)
-{
     glUniformMatrix4fv(view_proj_loc_, 1, GL_FALSE, glm::value_ptr(camera.view_proj()));
     glUniform3fv(camera_pos_loc_, 1, glm::value_ptr(camera.pos()));
     glDrawElements(GL_POINTS, buffered_points_, GL_UNSIGNED_INT, nullptr);

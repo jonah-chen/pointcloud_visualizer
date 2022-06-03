@@ -13,7 +13,7 @@ class HUD
 {
 public:
     HUD(GLFWwindow *window, Camera &camera, unsigned int &age, 
-        Renderer &renderer, std::vector<Mask> &masks);
+        PointRenderer &renderer, std::vector<Mask> &masks);
     ~HUD();
     void configure();
     void render();

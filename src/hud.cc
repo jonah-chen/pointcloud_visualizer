@@ -2,7 +2,7 @@
 #include "hud.hpp"
 
 HUD::HUD(GLFWwindow *window, Camera &camera, unsigned int &age, 
-         Renderer &renderer, std::vector<Mask> &masks)
+         PointRenderer &renderer, std::vector<Mask> &masks)
     : camera_(camera),
         age_(age),
         masks_(masks), 

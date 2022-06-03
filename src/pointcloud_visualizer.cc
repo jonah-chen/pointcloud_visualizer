@@ -78,7 +78,7 @@ int main(int argc, char** argv)
         masks_applied.push_back(mask.active);
     
     
-    Renderer renderer(args.find("windowed") == args.end());
+    PointRenderer renderer(args.find("windowed") == args.end());
     Camera camera(
         centroid(og_cloud),                                     // position
         glm::vec3(0.0f, 0.0f, 1.0f),                            // forward
