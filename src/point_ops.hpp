@@ -30,7 +30,7 @@ struct Mask
      */
     void apply(PointCloud &points);
 
-    void apply(o3d_PointCloud &points);
+    void apply(m_PointCloud &points);
 };
 
 struct BBox

@@ -13,6 +13,18 @@ struct PNC
     glm::vec3 c;
 };
 
+struct m_PointCloud 
+{
+    std::vector<PNC> v;
+    std::vector<Eigen::Vector3i> f;
+    m_PointCloud(size_t);
+    constexpr size_t size() const { return v.size(); }
+    constexpr const PNC *vertices() const { return v.data(); }
+    constexpr PNC *vertices() { return v.data(); }
+    constexpr const unsigned int *indices() const { return (const unsigned int *)f.data(); }
+    constexpr unsigned int *indices() { return (unsigned int *)f.data(); }
+};
+
 /**
  * Load a meshed pointcloud generated using the BPA algorithm from a file.
  * The original points are also required to maintain order of the points for
@@ -23,4 +35,4 @@ struct PNC
  * the S3DIS dataset.
  * @return o3d_PointCloud The meshed and ordered pointcloud. 
  */
-o3d_PointCloud load_mesh(const std::string &mesh, bool exchange_yz);
+m_PointCloud load_mesh(const std::string &mesh, bool exchange_yz);

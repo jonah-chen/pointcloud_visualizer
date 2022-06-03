@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "points.hpp"
 #include "camera.hpp"
+#include "mesh.hpp"
 
 GLFWwindow *init_window(bool fullscreen=true);
 GLuint compile_shader(const char *vertex, const char *fragment);
@@ -98,5 +99,63 @@ private:
 
 class MeshRenderer
 {
+public:
+    using vertex_type = PNC;
+    MeshRenderer(const m_PointCloud &pc, bool fullscreen = true);
 
+    constexpr static size_t POINT_SIZE = sizeof(vertex_type);
+
+
+private:
+    GLFWwindow *window_;
+    GLuint vao_, vbo_, ebo_;
+    GLuint shader_;
+
+private:
+    // perform shading
+    const char *v_src = R"(
+        #version 450 core
+        layout(location = 0) in vec3 aPos;
+        layout(location = 1) in vec3 aNormal;
+        layout(location = 2) in vec3 aColor;
+
+        uniform mat4 view_proj;
+        out vec3 vColor;
+        out vec3 vNormal;
+
+        void main()
+        {
+            vColor = aColor;
+            vNormal = aNormal;
+            gl_Position = view_proj * vec4(aPos, 1.0);
+        }
+    )";
+
+    const char *f_src = R"(
+        #version 450 core
+        in vec3 vColor;
+        in vec3 vNormal;
+        out vec4 color;
+        uniform vec3 lightPos;
+        uniform vec3 cameraPos;
+        uniform vec3 lightColor;
+        void main()
+        {
+            // ambient
+            vec3 ambient = 0.1 * vColor;
+            
+            // diffuse
+            vec3 norm = normalize(vNormal);
+            vec3 lightDir = normalize(lightPos - cameraPos);
+            float diff = max(dot(norm, lightDir), 0.0);
+            vec3 diffuse = diff * lightColor * vColor;
+            
+            // specular
+            vec3 viewDir = normalize(cameraPos - lightPos);
+            vec3 reflectDir = reflect(-lightDir, norm);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+            vec3 specular = spec * lightColor * vColor;
+            color = vec4(ambient + diffuse + specular, 1.0);
+        }
+    )";
 };

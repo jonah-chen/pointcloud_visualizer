@@ -15,32 +15,53 @@ namespace std
     };
 }
 
-o3d_PointCloud load_mesh(const std::string &filename, bool exchange_yz)
+m_PointCloud load_mesh(const std::string &filename, bool exchange_yz)
 {    
     o3d_PointCloud pc;
     if (!open3d::io::ReadTriangleMesh(filename, pc))
-        throw std::runtime_error("load: cannot load mesh from " + mesh);
+        throw std::runtime_error("load: cannot load mesh from " + filename);
     if (!pc.HasVertices())
         throw std::runtime_error("load: mesh has no vertices");
     if (!pc.HasTriangles())
         throw std::runtime_error("load: mesh has no triangles");
-    
+    if (!pc.HasVertexNormals())
+        throw std::runtime_error("load: mesh has no vertex normals");
+    if (!pc.HasVertexColors())
+        throw std::runtime_error("load: mesh has no vertex colors");
+    if (pc.vertices_.size() != pc.vertex_colors_.size())
+        throw std::runtime_error("load: mesh has different number of vertices and vertex colors");
+    if (pc.vertices_.size() != pc.vertex_normals_.size())
+        throw std::runtime_error("load: mesh has different number of vertices and vertex normals");
+
+    m_PointCloud vertices(pc.vertices_.size());
+
     if (exchange_yz)
     {
 #pragma omp parallel for
-        for (auto &v : pc.vertices_)
+        for (size_t i = 0; i < pc.vertices_.size(); ++i)
         {
-            auto tmp = v.y();
-            v.y() = v.z();
-            v.z() = -tmp;
-        }
-#pragma omp parallel for
-        for (auto &v : pc.vertex_normals_)
-        {
-            auto tmp = v.y();
-            v.y() = v.z();
-            v.z() = -tmp;
+            auto &p = pc.vertices_[i];
+            auto &n = pc.vertex_normals_[i];
+            auto &c = pc.vertex_colors_[i];
+            vertices.v[i].p = {p.x(), p.z(), -p.y()};
+            vertices.v[i].n = {n.x(), n.z(), -n.y()};
+            vertices.v[i].c = {c.x(), c.y(), c.z()};
         }
     }
-
+    else
+    {   
+#pragma omp parallel for
+        for (size_t i = 0; i < pc.vertices_.size(); ++i)
+        {
+            auto &p = pc.vertices_[i];
+            auto &n = pc.vertex_normals_[i];
+            auto &c = pc.vertex_colors_[i];
+            vertices.v[i].p = {p.x(), p.y(), p.z()}; 
+            vertices.v[i].n = {n.x(), n.y(), n.z()};
+            vertices.v[i].c = {c.x(), c.y(), c.z()};
+        }
+        return vertices;
+    }
 }
+
+

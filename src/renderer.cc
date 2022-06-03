@@ -92,7 +92,7 @@ GLFWwindow *init_window(bool fullscreen)
     return window;
 }
 
-GLuint compule_shader(const char *vertex, const char *fragment)
+GLuint compile_shader(const char *vertex, const char *fragment)
 {
     GLuint shader = glCreateProgram();
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -137,13 +137,13 @@ PointRenderer::PointRenderer(bool fullscreen)
     glBufferData(GL_ARRAY_BUFFER, POINT_SIZE * MAX_PTS, nullptr, GL_DYNAMIC_DRAW);
 
     // XYZ
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, (const void *)offsetof(vertex_type, xyz));
     glEnableVertexAttribArray(0);
     // RGB
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, (const void *)offsetof(vertex_type, rgb));
     glEnableVertexAttribArray(1);
     // D^2
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, POINT_SIZE, (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, POINT_SIZE, (const void *)offsetof(vertex_type, d_sq));
     glEnableVertexAttribArray(2);
 
     glGenBuffers(1, &ebo_);
@@ -153,7 +153,7 @@ PointRenderer::PointRenderer(bool fullscreen)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_PTS * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
-    shader_ = compule_shader(v_src, f_src);
+    shader_ = compile_shader(v_src, f_src);
 
     view_proj_loc_ = glGetUniformLocation(shader_, "view_proj");
     max_point_size_loc_ = glGetUniformLocation(shader_, "max_point_size");
@@ -183,4 +183,41 @@ void PointRenderer::draw(const void *pts, const size_t n, const Camera &camera)
     glUniformMatrix4fv(view_proj_loc_, 1, GL_FALSE, glm::value_ptr(camera.view_proj()));
     glUniform3fv(camera_pos_loc_, 1, glm::value_ptr(camera.pos()));
     glDrawElements(GL_POINTS, buffered_points_, GL_UNSIGNED_INT, nullptr);
+}
+
+MeshRenderer::MeshRenderer(const m_PointCloud &pc, bool fullscreen)
+{
+    window_ = init_window(fullscreen);
+
+#ifndef NDEBUG
+    if (OPENGL_VERSION_MAJOR >= 4 && OPENGL_VERSION_MINOR >= 3)
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(debugCallback, nullptr);
+    }
+#endif
+
+    glGenVertexArrays(1, &vao_);
+    glBindVertexArray(vao_);
+
+    glGenBuffers(1, &vbo_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+
+    glBufferData(GL_ARRAY_BUFFER, pc.size() * POINT_SIZE, pc.vertices(), GL_DYNAMIC_DRAW);
+    // XYZ
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, (const void *)offsetof(vertex_type, p));
+    glEnableVertexAttribArray(0);
+    // RGB
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, (const void *)offsetof(vertex_type, n));
+    glEnableVertexAttribArray(1);
+    // D^2
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, (const void*)offsetof(vertex_type, c));
+    glEnableVertexAttribArray(2);
+
+    glGenBuffers(1, &ebo_);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, pc.size() * sizeof(GLuint), pc.indices(), GL_DYNAMIC_DRAW);
+
+    shader_ = compile_shader(v_src, f_src);
 }
