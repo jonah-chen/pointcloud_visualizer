@@ -9,4 +9,4 @@ This repo will mainly include features tailored to visualizing results from 3D i
 2. Render the tightest bounding boxes and other bounding boxes
 ~~3. Learn to do [normal estimation](https://pcl-docs.readthedocs.io/en/latest/pcl/doc/tutorials/content/normal_estimation.html) on 3D scans that does not come with normals~~
 ~~4. Explore different methods of mesh reconstruction to be able to render meshes from pointcloud. Then, attempt to create instance masks with meshed objects, starting with [this](https://towardsdatascience.com/5-step-guide-to-generate-3d-meshes-from-point-clouds-with-python-36bad397d8ba).~~
-5. Learn to use a Z-Buffer to be able to render the triangle meshes without sorting.
+~~5. Learn to use a Z-Buffer to be able to render the triangle meshes without sorting.~~

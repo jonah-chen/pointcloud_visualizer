@@ -19,6 +19,7 @@ then
     echo "Moving Open3D headers to ./include/open3d"
 fi
 
+mkdir lib
 if mv ./open3d/lib/libOpen3D.so ./lib/libOpen3D.so
 then
     echo "Moving Open3D library to ./lib/libOpen3D.so"
