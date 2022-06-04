@@ -120,11 +120,16 @@ MeshHUD::MeshHUD(GLFWwindow *window, Camera &camera, std::vector<Mask> &masks,
 {
     lightColor_ptr_ = renderer.lightColor_ptr();
     lightPos_ptr_ = renderer.lightPos_ptr();
+
+    const auto &pos = camera.pos();
+    lightPos_ptr_[0] = pos.x;
+    lightPos_ptr_[1] = pos.y;
+    lightPos_ptr_[2] = pos.z;
 }
 
 void MeshHUD::C_controls()
 {
     HUD::C_controls();
     ImGui::ColorEdit3("Light Color", lightColor_ptr_);
-    ImGui::SliderFloat3("Light Position", lightPos_ptr_, -10.f, 10.f);
+    ImGui::DragFloat3("Light Position", lightPos_ptr_, 0.2f, -100.f, 100.f);
 }
