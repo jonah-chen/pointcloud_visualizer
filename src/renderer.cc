@@ -115,9 +115,11 @@ GLuint compile_shader(const char *vertex, const char *fragment)
     return shader;
 }
 
-PointRenderer::PointRenderer(bool fullscreen)
+PointRenderer::PointRenderer(const PointCloud &cloud, bool fullscreen)
+    : points_ (cloud.size())
 {
     window_ = init_window(fullscreen);
+
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -136,7 +138,7 @@ PointRenderer::PointRenderer(bool fullscreen)
 
     glGenBuffers(1, &vbo_);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-    glBufferData(GL_ARRAY_BUFFER, POINT_SIZE * MAX_PTS, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, POINT_SIZE * points_, cloud.data(), GL_STATIC_DRAW);
 
     // XYZ
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, (const void *)offsetof(vertex_type, xyz));
@@ -146,11 +148,11 @@ PointRenderer::PointRenderer(bool fullscreen)
     glEnableVertexAttribArray(1);
 
     glGenBuffers(1, &ebo_);
-    std::vector<GLuint> indices(MAX_PTS);
+    std::vector<GLuint> indices(points_);
     std::iota(indices.begin(), indices.end(), 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_PTS * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, points_ * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
     shader_ = compile_shader(v_src, f_src);
 
@@ -170,23 +172,19 @@ PointRenderer::~PointRenderer()
     glfwTerminate();
 }
 
-void PointRenderer::draw(const void *pts, const size_t n, const Camera &camera)
+void PointRenderer::draw(const PointCloud &cloud, const Camera &camera)
 {
-    if (n > MAX_PTS)
-        throw std::runtime_error("Too many points of " + std::to_string(n) + " to draw");
-    
-    buffered_points_ = n;
-    glBufferSubData(GL_ARRAY_BUFFER, 0, buffered_points_ * POINT_SIZE, pts);
-    glUniform1f(point_size_1m_loc_, point_size_1m);
-    glUniform1f(max_point_size_loc_, 1e4f /(max_point_size_dist * max_point_size_dist));
+    glBufferSubData(GL_ARRAY_BUFFER, 0, points_ * POINT_SIZE, cloud.data());
     draw(camera);
 }
 
 void PointRenderer::draw(const Camera &camera)
 {
+    glUniform1f(point_size_1m_loc_, point_size_1m);
+    glUniform1f(max_point_size_loc_, 1e4f /(max_point_size_dist * max_point_size_dist));
     glUniformMatrix4fv(view_proj_loc_, 1, GL_FALSE, glm::value_ptr(camera.view_proj()));
     glUniform3fv(camera_pos_loc_, 1, glm::value_ptr(camera.pos()));
-    glDrawElements(GL_POINTS, buffered_points_, GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_POINTS, points_, GL_UNSIGNED_INT, nullptr);
 }
 
 MeshRenderer::MeshRenderer(const m_PointCloud &pc, bool fullscreen)

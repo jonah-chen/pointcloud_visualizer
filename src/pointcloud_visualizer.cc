@@ -10,8 +10,6 @@
 #include <chrono>
 #include <unordered_map>
 
-static unsigned int age = 0;
-
 std::unordered_map<std::string, char*> parse_args(int argc, char **argv)
 {
     std::unordered_map<std::string, char*> args;
@@ -77,9 +75,9 @@ int main(int argc, char** argv)
         masks_applied.push_back(mask.active);
     
     
-    PointRenderer renderer(args.find("windowed") == args.end());
+    PointRenderer renderer(cloud, args.find("windowed") == args.end());
     Camera camera(
-        centroid(og_cloud),                                     // position
+        centroid(cloud),                                        // position
         glm::vec3(0.0f, 0.0f, 1.0f),                            // forward
         glm::vec3(0.0f, 1.0f, 0.0f),                            // up
         1.2f,                                                   // fov
@@ -90,7 +88,7 @@ int main(int argc, char** argv)
     );
 
 
-    HUD hud(renderer.window(), camera, age, renderer, masks);
+    HUD hud(renderer.window(), camera, renderer, masks);
     user_inputs inputs, prev_inputs;
     bool to_move = false;
 
@@ -141,7 +139,11 @@ int main(int argc, char** argv)
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        renderer.draw(cloud.data(), cloud.size(), camera);
+
+        if (mask_updated)
+            renderer.draw(cloud, camera);
+        else
+            renderer.draw(camera);
         hud.render();
 
         glfwSwapBuffers(renderer.window());

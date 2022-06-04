@@ -17,7 +17,6 @@ class PointRenderer
 public:
     using vertex_type = XYZRGB;
 
-    constexpr static size_t MAX_PTS = (1u << 24);
     constexpr static size_t POINT_SIZE = sizeof(vertex_type);
     constexpr static int FPS = 60;
 
@@ -26,7 +25,7 @@ public:
     float max_point_size_dist = 60.0f;
 
 public:
-    PointRenderer(bool fullscreen = true);
+    PointRenderer(const PointCloud &cloud, bool fullscreen = true);
     ~PointRenderer();
 
     /**
@@ -38,7 +37,7 @@ public:
      * @param n number of points to draw.
      * @param camera camera to use for the perspective.
      */
-    void draw(const void *pts, const size_t n, const Camera &camera);
+    void draw(const PointCloud &cloud, const Camera &camera);
     void draw(const Camera &camera);
 
 
@@ -63,7 +62,7 @@ private:
     GLint max_point_size_loc_;
     GLint camera_pos_loc_;
 
-    size_t buffered_points_ {};
+    size_t points_;
 
     int width_ = 1600, height_ = 1200;
 

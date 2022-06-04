@@ -1,10 +1,9 @@
 
 #include "hud.hpp"
 
-HUD::HUD(GLFWwindow *window, Camera &camera, unsigned int &age, 
+HUD::HUD(GLFWwindow *window, Camera &camera, 
          PointRenderer &renderer, std::vector<Mask> &masks)
     : camera_(camera),
-        age_(age),
         masks_(masks), 
         default_ground_level_(camera.ground_level)
 {
@@ -33,8 +32,8 @@ void HUD::configure()
     ImGui::NewFrame();
     ImGui::Begin("Info");
 
-    ImGui::Text("Position  : %.2f/%.2f/%.2f | Age: %d frames", 
-        camera_.pos().x, camera_.pos().y, camera_.pos().z, age_);
+    ImGui::Text("Position  : %.2f/%.2f/%.2f", 
+        camera_.pos().x, camera_.pos().y, camera_.pos().z);
     ImGui::Text("Facing    : %.4f/%.4f/%.4f", 
         camera_.fwd().x, camera_.fwd().y, camera_.fwd().z);
     ImGui::Text("Frame time: %.3f ms/frame (%.1f FPS)", 
