@@ -37,6 +37,15 @@ debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
 
 #endif
 
+namespace {
+
+/**
+ * Create GLFW window.
+ * 
+ * @param fullscreen window is fullscreen if true.
+ * @param aspect aspect ratio of the window.
+ * @return GLFWwindow* pointer to the window.
+ */
 GLFWwindow *init_window(bool fullscreen, float &aspect)
 {
     if (!glfwInit())
@@ -93,6 +102,13 @@ GLFWwindow *init_window(bool fullscreen, float &aspect)
     return window;
 }
 
+/**
+ * Compile the vertex and fragment shader.
+ * 
+ * @param vertex shader source code.
+ * @param fragment shader source code.
+ * @return GLuint shader program ID.
+ */
 GLuint compile_shader(const char *vertex, const char *fragment)
 {
     GLuint shader = glCreateProgram();
@@ -114,6 +130,8 @@ GLuint compile_shader(const char *vertex, const char *fragment)
 
     glUseProgram(shader);
     return shader;
+}
+
 }
 
 PointRenderer::PointRenderer(const PointCloud &cloud, bool fullscreen)
@@ -175,14 +193,14 @@ PointRenderer::~PointRenderer()
 
 void PointRenderer::draw(const PointCloud &cloud, const Camera &camera)
 {
-    glBufferSubData(GL_ARRAY_BUFFER, 0, points_ * POINT_SIZE, cloud.data());
+    glBufferData(GL_ARRAY_BUFFER, POINT_SIZE * points_, cloud.data(), GL_STATIC_DRAW);
     draw(camera);
 }
 
 void PointRenderer::draw(const Camera &camera)
 {
-    glUniform1f(point_size_1m_loc_, point_size_1m);
-    glUniform1f(max_point_size_loc_, 1e4f /(max_point_size_dist * max_point_size_dist));
+    glUniform1f(point_size_1m_loc_, point_size_1m_);
+    glUniform1f(max_point_size_loc_, 1e4f /(max_point_size_dist_ * max_point_size_dist_));
     glUniformMatrix4fv(view_proj_loc_, 1, GL_FALSE, glm::value_ptr(camera.view_proj()));
     glUniform3fv(camera_pos_loc_, 1, glm::value_ptr(camera.pos()));
     glDrawElements(GL_POINTS, points_, GL_UNSIGNED_INT, nullptr);
@@ -247,7 +265,7 @@ MeshRenderer::~MeshRenderer()
 
 void MeshRenderer::draw(const m_PointCloud &pc, const Camera &camera)
 {
-    glBufferSubData(GL_ARRAY_BUFFER, 0, pc.size() * POINT_SIZE, pc.vertices());
+    glBufferData(GL_ARRAY_BUFFER, pc.size() * POINT_SIZE, pc.vertices(), GL_STATIC_DRAW);
     draw(camera);
 }
 
@@ -255,7 +273,7 @@ void MeshRenderer::draw(const Camera &camera)
 {
     glUniformMatrix4fv(view_proj_loc_, 1, GL_FALSE, glm::value_ptr(camera.view_proj()));
     glUniform3fv(cameraPos_loc_, 1, glm::value_ptr(camera.pos()));
-    glUniform3f(lightPos_loc_, 0.0f, 4.0f, 0.0f);
-    glUniform3f(lightColor_loc_, 1.0f, 1.0f, 1.0f);
+    glUniform3fv(lightPos_loc_, 1, lightPos_);
+    glUniform3fv(lightColor_loc_, 1, lightColor_);
     glDrawElements(GL_TRIANGLES, num_indices_, GL_UNSIGNED_INT, nullptr);
 }

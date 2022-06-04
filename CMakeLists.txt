@@ -27,8 +27,7 @@ set(Point_Src ${SRC_DIR}/camera.cc
               ${SRC_DIR}/renderer.cc
               ${SRC_DIR}/input.cc
               ${SRC_DIR}/point_ops.cc
-              ${SRC_DIR}/hud.cc
-              ${SRC_DIR}/parser.cc)
+              ${SRC_DIR}/hud.cc)
 
 include_directories(${SRC_DIR} 
                     ${INCLUDE_DIR}

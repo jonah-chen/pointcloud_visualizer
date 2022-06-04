@@ -29,7 +29,7 @@ public:
     void configure();
 
     /**
-     * Render the HUD. Should be called after all other draws on this frame. 
+     * Render the HUD. Should be called after all other draws on this frame.
      */
     void render();
 
@@ -50,10 +50,21 @@ protected:
 class PointHUD : public HUD
 {
 public:
-    PointHUD(GLFWwindow *window, Camera &camera, 
-             PointRenderer &renderer, std::vector<Mask> &masks);
+    PointHUD(GLFWwindow *window, Camera &camera, std::vector<Mask> &masks,
+             PointRenderer &renderer);
     
 private:
     void C_controls() override;
     float *point_size_1m_ptr_, *max_point_size_dist_ptr_;
+};
+
+class MeshHUD : public HUD
+{
+public:
+    MeshHUD(GLFWwindow *window, Camera &camera, std::vector<Mask> &masks,
+            MeshRenderer &renderer);
+    
+private:
+    void C_controls() override;
+    float *lightColor_ptr_, *lightPos_ptr_;
 };

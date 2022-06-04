@@ -67,6 +67,7 @@ BBox tightest_bbox(const PointCloud &points, const Mask &mask);
  * @return glm::vec3 the center of the point cloud.
  */
 glm::vec3 centroid(const PointCloud &points);
+inline glm::vec3 centroid(const m_PointCloud &points) { return points.centroid(); }
 
 /**
  * Find the center of a given object in the scene.

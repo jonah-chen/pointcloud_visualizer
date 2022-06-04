@@ -97,19 +97,34 @@ void HUD::C_masks()
 }
 
 
-PointHUD::PointHUD(GLFWwindow *window, Camera &camera, PointRenderer &renderer, std::vector<Mask> &masks)
+PointHUD::PointHUD(GLFWwindow *window, Camera &camera, std::vector<Mask> &masks, 
+                   PointRenderer &renderer)
     : HUD(window, camera, masks)
 {
-    point_size_1m_ptr_ = &(renderer.point_size_1m);
-    max_point_size_dist_ptr_ = &(renderer.max_point_size_dist);
+    point_size_1m_ptr_ = renderer.point_size_1m_ptr();
+    max_point_size_dist_ptr_ = renderer.max_point_size_dist_ptr();
 }
 
 void PointHUD::C_controls()
 {
+    HUD::C_controls();
     ImGui::SliderFloat("Point Size @1m", point_size_1m_ptr_, 1.f, 64.f, "%.1f", 
         ImGuiSliderFlags_Logarithmic);
     ImGui::SliderFloat("Max Point Size Distance (cm)" , 
         max_point_size_dist_ptr_, 10.f, 200.f, "%.1f", ImGuiSliderFlags_Logarithmic);
-    ImGui::SliderFloat("Ground", &camera_.ground_level, 
-        default_ground_level_ - 2.0f, default_ground_level_ + 2.0f);
+}
+
+MeshHUD::MeshHUD(GLFWwindow *window, Camera &camera, std::vector<Mask> &masks, 
+                 MeshRenderer &renderer)
+    : HUD(window, camera, masks)
+{
+    lightColor_ptr_ = renderer.lightColor_ptr();
+    lightPos_ptr_ = renderer.lightPos_ptr();
+}
+
+void MeshHUD::C_controls()
+{
+    HUD::C_controls();
+    ImGui::ColorEdit3("Light Color", lightColor_ptr_);
+    ImGui::SliderFloat3("Light Position", lightPos_ptr_, -10.f, 10.f);
 }

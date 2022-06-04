@@ -8,10 +8,6 @@
 #include "camera.hpp"
 #include "mesh.hpp"
 
-GLFWwindow *init_window(bool fullscreen=true);
-GLuint compile_shader(const char *vertex, const char *fragment);
-
-
 class PointRenderer
 {
 public:
@@ -19,10 +15,6 @@ public:
 
     constexpr static size_t POINT_SIZE = sizeof(vertex_type);
     constexpr static int FPS = 60;
-
-public:
-    float point_size_1m = 20.0f;        // default values
-    float max_point_size_dist = 60.0f;
 
 public:
     PointRenderer(const PointCloud &cloud, bool fullscreen = true);
@@ -50,6 +42,8 @@ public:
 public:
     inline GLFWwindow *window() const { return window_; }
     constexpr float aspect() const { return aspect_; }
+    constexpr float *point_size_1m_ptr() { return &point_size_1m_; }
+    constexpr float *max_point_size_dist_ptr() { return &max_point_size_dist_; }
 
 private:
     GLFWwindow *window_;
@@ -63,6 +57,9 @@ private:
 
     size_t points_;
     float aspect_;
+
+    float point_size_1m_ = 20.0f;        // default values
+    float max_point_size_dist_ = 60.0f;
 
 private:
     const char *v_src = R"(
@@ -99,6 +96,7 @@ private:
 class MeshRenderer
 {
 public:
+    using uniform3 = float[3];
     using vertex_type = PNC;
     MeshRenderer(const m_PointCloud &pc, bool fullscreen = true);
     ~MeshRenderer();
@@ -113,6 +111,9 @@ public:
     inline void disable_cursor() { glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
     inline void enable_cursor() { glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
 
+    constexpr float *lightColor_ptr() { return lightColor_; }
+    constexpr float *lightPos_ptr() { return lightPos_; }
+
 private:
     GLFWwindow *window_;
     GLuint vao_, vbo_, ebo_;
@@ -126,6 +127,8 @@ private:
     GLint lightColor_loc_;
 
     float aspect_;
+    uniform3 lightPos_ {};
+    uniform3 lightColor_ { 1.0f, 1.0f, 1.0f };
 
 private:
     // perform shading
@@ -173,7 +176,7 @@ private:
             float specStrength = 0.5;
             vec3 viewDir = normalize(cameraPos - lightPos);
             vec3 reflectDir = reflect(-lightDir, norm);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8);
             vec3 specular = specStrength * spec * lightColor;
 
             FragColor = (ambient + diffuse + specular) * vColor;
