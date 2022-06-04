@@ -8,7 +8,7 @@
 #include <vector>
 
 using pcl_PointCloud = pcl::PointCloud<pcl::PointXYZRGB>;
-struct XYZRGBD
+struct XYZRGB
 {
     union
     {
@@ -28,26 +28,13 @@ struct XYZRGBD
     };
     float d_sq;
 
-    XYZRGBD();
-    XYZRGBD(const XYZRGBD &pt) = default;
+    XYZRGB();
+    XYZRGB(const XYZRGB &pt) = default;
 
-    XYZRGBD(const pcl::PointXYZRGB &pt, bool exchange_yz=false, 
-            float d=std::numeric_limits<float>::infinity());
-
-    XYZRGBD(const pcl::PointXYZRGB &pt, const glm::vec3 &camera_pos, bool exchange_yz=false);
-
-    /**
-     * Update the distance based on the new camera position.
-     * 
-     * @param camera_pos camera position.
-     */
-    void update(const glm::vec3 &camera_pos);
-
-    inline bool operator<(const XYZRGBD &rhs) const { return d_sq < rhs.d_sq; }
-    inline bool operator>(const XYZRGBD &rhs) const { return d_sq > rhs.d_sq; }
+    XYZRGB(const pcl::PointXYZRGB &pt, bool exchange_yz=false);
 };
 
-using PointCloud = std::vector<XYZRGBD>;
+using PointCloud = std::vector<XYZRGB>;
 
 /**
  * Load a point cloud from a .ply or .pcd file into a renderable format with

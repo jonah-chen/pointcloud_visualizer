@@ -15,7 +15,7 @@ GLuint compile_shader(const char *vertex, const char *fragment);
 class PointRenderer
 {
 public:
-    using vertex_type = XYZRGBD;
+    using vertex_type = XYZRGB;
 
     constexpr static size_t MAX_PTS = (1u << 24);
     constexpr static size_t POINT_SIZE = sizeof(vertex_type);
@@ -39,6 +39,8 @@ public:
      * @param camera camera to use for the perspective.
      */
     void draw(const void *pts, const size_t n, const Camera &camera);
+    void draw(const Camera &camera);
+
 
     /**
      * Functions to control the cursor state

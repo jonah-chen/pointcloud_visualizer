@@ -144,9 +144,6 @@ PointRenderer::PointRenderer(bool fullscreen)
     // RGB
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, (const void *)offsetof(vertex_type, rgb));
     glEnableVertexAttribArray(1);
-    // D^2
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, POINT_SIZE, (const void *)offsetof(vertex_type, d_sq));
-    glEnableVertexAttribArray(2);
 
     glGenBuffers(1, &ebo_);
     std::vector<GLuint> indices(MAX_PTS);
@@ -182,6 +179,11 @@ void PointRenderer::draw(const void *pts, const size_t n, const Camera &camera)
     glBufferSubData(GL_ARRAY_BUFFER, 0, buffered_points_ * POINT_SIZE, pts);
     glUniform1f(point_size_1m_loc_, point_size_1m);
     glUniform1f(max_point_size_loc_, 1e4f /(max_point_size_dist * max_point_size_dist));
+    draw(camera);
+}
+
+void PointRenderer::draw(const Camera &camera)
+{
     glUniformMatrix4fv(view_proj_loc_, 1, GL_FALSE, glm::value_ptr(camera.view_proj()));
     glUniform3fv(camera_pos_loc_, 1, glm::value_ptr(camera.pos()));
     glDrawElements(GL_POINTS, buffered_points_, GL_UNSIGNED_INT, nullptr);

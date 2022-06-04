@@ -27,65 +27,13 @@ PointCloud load(const std::string &filename, bool exchange_xz)
     return points;
 }
 
-XYZRGBD::XYZRGBD()
+XYZRGB::XYZRGB()
 {
-    memset(this, 0, sizeof(XYZRGBD));
+    memset(this, 0, sizeof(XYZRGB));
 }
 
-XYZRGBD::XYZRGBD(const pcl::PointXYZRGB &pt, bool exchange_yz, float d)
+XYZRGB::XYZRGB(const pcl::PointXYZRGB &pt, bool exchange_yz)
 {
     xyz = exchange_yz ? glm::vec3(pt.x, pt.z, -pt.y) : glm::vec3(pt.x, pt.y, pt.z);
     rgb = glm::vec3(pt.r, pt.g, pt.b) / 255.0f;
-    d_sq = d * d;
-}
-
-XYZRGBD::XYZRGBD(const pcl::PointXYZRGB &pt, const glm::vec3 &camera_pos, bool exchange_yz)
-{
-    xyz = exchange_yz ? glm::vec3(pt.x, pt.z, -pt.y) : glm::vec3(pt.x, pt.y, pt.z);
-    rgb = glm::vec3(pt.r, pt.g, pt.b) / 255.0f;
-    d_sq = glm::distance2(xyz, camera_pos);
-}
-
-void XYZRGBD::update(const glm::vec3 &camera_pos)
-{
-    d_sq = glm::distance2(xyz, camera_pos);
-}
-
-void update(PointCloud &points, const glm::vec3 &camera_pos)
-{
-#pragma omp parallel for
-    for (size_t i = 0; i < points.size(); ++i)
-        points[i].update(camera_pos);
-}
-
-void resort(PointCloud &points)
-{
-    std::sort(points.begin(), points.end(), std::greater<XYZRGBD>());
-}
-
-PointCloud update_async(const PointCloud &points, const glm::vec3 &camera_pos)
-{
-    PointCloud new_points(points);
-#pragma omp parallel for
-    for (auto &pt : new_points)
-        pt.update(camera_pos);
-    return new_points;
-}
-
-PointCloud resort_async(const PointCloud &points)
-{
-    PointCloud new_points(points);
-    std::sort(new_points.begin(), new_points.end(), std::greater<XYZRGBD>());
-    return new_points;
-}
-
-PointCloud update_resort_async(const PointCloud &points, const glm::vec3 &camera_pos)
-{
-    PointCloud new_points(points);
-#pragma omp parallel for
-    for (auto &pt : new_points)
-        pt.update(camera_pos);
-
-    std::sort(new_points.begin(), new_points.end(), std::greater<XYZRGBD>());
-    return new_points;
 }

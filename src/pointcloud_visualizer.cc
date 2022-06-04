@@ -54,7 +54,6 @@ int main(int argc, char** argv)
 {
     auto args = parse_args(argc, argv);
 
-    std::future<PointCloud> buf_sorted;
     std::vector<Mask> masks;
     std::vector<bool> masks_applied;
     bool mask_updated;
@@ -95,9 +94,6 @@ int main(int argc, char** argv)
     user_inputs inputs, prev_inputs;
     bool to_move = false;
 
-    update(cloud, camera.pos());
-    resort(cloud);
-
     // Main loop
     while (!glfwWindowShouldClose(renderer.window()))
     {
@@ -136,32 +132,8 @@ int main(int argc, char** argv)
             for (auto msk_it = masks.rbegin(); msk_it != masks.rend(); ++msk_it)
                 if (msk_it->active)
                     msk_it->apply(cloud);
-
-            buf_sorted = std::async(std::launch::async, update_resort_async, 
-                cloud, camera.pos());
             
             to_move = false;
-        }
-        if (K_R(inputs) || mask_updated)
-        {
-            update(cloud, camera.pos());
-            resort(cloud);
-            age = 0;
-        }
-        else
-        {
-            age++;
-            if (!buf_sorted.valid())
-            {
-                buf_sorted = std::async(std::launch::async, update_resort_async,
-                    cloud, camera.pos());
-            }
-            else if (buf_sorted.wait_for(std::chrono::seconds(0)) 
-                == std::future_status::ready)
-            {
-                cloud = buf_sorted.get();
-                age = 0;
-            }
         }
 
         hud.configure();
