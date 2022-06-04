@@ -12,15 +12,48 @@
 class HUD
 {
 public:
-    HUD(GLFWwindow *window, Camera &camera, 
-        PointRenderer &renderer, std::vector<Mask> &masks);
+    HUD(GLFWwindow *window, Camera &camera, std::vector<Mask> &masks);
     ~HUD();
+
+    /**
+     * Configure the HUD.
+     * When inheriting, the HUD is always configured with
+     *  - info
+     *  (seperator)
+     *  - controls
+     *  (seperate window)
+     *  - masks (if any)
+     *  (seperate window)
+     *  - extra
+     */
     void configure();
+
+    /**
+     * Render the HUD. Should be called after all other draws on this frame. 
+     */
     void render();
 
-private:
+protected:
     Camera &camera_;
-    float *point_size_1m_ptr_, *max_point_size_dist_ptr_;
     std::vector<Mask> &masks_;
     float default_ground_level_;
+
+    /**
+     * Config for different parts of the HUD.
+     */
+    virtual void C_info();
+    virtual void C_controls();
+    virtual void C_masks();
+    virtual void C_extra() {}
+};
+
+class PointHUD : public HUD
+{
+public:
+    PointHUD(GLFWwindow *window, Camera &camera, 
+             PointRenderer &renderer, std::vector<Mask> &masks);
+    
+private:
+    void C_controls() override;
+    float *point_size_1m_ptr_, *max_point_size_dist_ptr_;
 };

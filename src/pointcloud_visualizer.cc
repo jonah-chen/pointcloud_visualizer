@@ -4,49 +4,7 @@
 #include "point_ops.hpp"
 #include "input.hpp"
 #include "hud.hpp"
-
-#include <iostream>
-#include <future>
-#include <chrono>
-#include <unordered_map>
-
-std::unordered_map<std::string, char*> parse_args(int argc, char **argv)
-{
-    std::unordered_map<std::string, char*> args;
-    if (argc == 1 || argc == 2 && strcmp("--help", argv[1]) == 0)
-    {
-        std::cout << "Usage: ./renderer <input ply/pcd> [OPTIONS]\n"
-                     "Options:\n"
-                     "  --windowed : run in windowed mode\n"
-                     "  --yz : swap yz coordinates in input file\n"
-                     "  --mask <path to mask file> : mask file with format:\n"
-                     "      <path to mask> <color hex code> <class>\n"
-                     "      ...\n";
-
-        exit(EXIT_SUCCESS);
-    }
-
-    args["pointcloud"] = argv[1];
-
-    for (int i = 2; i < argc; ++i)
-    {
-        std::string arg = argv[i];
-        if (arg.find("--") == 0)
-        {
-            std::string key = arg.substr(2);
-            args[key] = nullptr;
-            if (i + 1 < argc)
-            {
-                std::string value = argv[i + 1];
-                if (value.find("--") == 0)
-                    continue;
-                args[key] = argv[i + 1];
-            }
-        }
-    }
-    return args;
-}
-
+#include "parser.hpp"
 
 int main(int argc, char** argv)
 {
@@ -77,18 +35,18 @@ int main(int argc, char** argv)
     
     PointRenderer renderer(cloud, args.find("windowed") == args.end());
     Camera camera(
-        centroid(cloud),                                        // position
-        glm::vec3(0.0f, 0.0f, 1.0f),                            // forward
-        glm::vec3(0.0f, 1.0f, 0.0f),                            // up
-        1.2f,                                                   // fov
-        (float) renderer.width() / (float) renderer.height(),   // aspect
-        0.1f,                                                   // near plane
-        200.0f,                                                 // far plane
-        ground_level                                            // ground plane
+        centroid(cloud),            // position
+        glm::vec3(0.0f, 0.0f, 1.0f),// forward
+        glm::vec3(0.0f, 1.0f, 0.0f),// up
+        1.2f,                       // fov
+        renderer.aspect(),          // aspect
+        0.1f,                       // near plane
+        200.0f,                     // far plane
+        ground_level                // ground plane
     );
 
 
-    HUD hud(renderer.window(), camera, renderer, masks);
+    PointHUD hud(renderer.window(), camera, renderer, masks);
     user_inputs inputs, prev_inputs;
     bool to_move = false;
 
@@ -104,12 +62,12 @@ int main(int argc, char** argv)
         else
             to_move = true;
 
-        if (LMB(inputs) && !LMB(prev_inputs))
+        if (DOWN(LMB, inputs, prev_inputs))
         {
             renderer.enable_cursor();
             to_move = false;
         }
-        else if (RMB(inputs) && !RMB(prev_inputs))
+        else if (DOWN(RMB, inputs, prev_inputs))
             renderer.disable_cursor();        
         if (K_ESC(inputs))
             break;

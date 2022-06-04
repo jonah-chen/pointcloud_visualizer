@@ -49,8 +49,7 @@ public:
 
 public:
     inline GLFWwindow *window() const { return window_; }
-    constexpr int width() const { return width_; }
-    constexpr int height() const { return height_; }
+    constexpr float aspect() const { return aspect_; }
 
 private:
     GLFWwindow *window_;
@@ -63,8 +62,7 @@ private:
     GLint camera_pos_loc_;
 
     size_t points_;
-
-    int width_ = 1600, height_ = 1200;
+    float aspect_;
 
 private:
     const char *v_src = R"(
@@ -103,9 +101,17 @@ class MeshRenderer
 public:
     using vertex_type = PNC;
     MeshRenderer(const m_PointCloud &pc, bool fullscreen = true);
+    ~MeshRenderer();
+
+    void draw(const Camera &camera);
+    void draw(const m_PointCloud &pc, const Camera &camera);
 
     constexpr static size_t POINT_SIZE = sizeof(vertex_type);
-
+    inline GLFWwindow *window() const { return window_; }
+    constexpr float aspect() const { return aspect_; }
+    
+    inline void disable_cursor() { glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
+    inline void enable_cursor() { glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
 
 private:
     GLFWwindow *window_;
@@ -118,6 +124,8 @@ private:
     GLint lightPos_loc_;
     GLint cameraPos_loc_;
     GLint lightColor_loc_;
+
+    float aspect_;
 
 private:
     // perform shading
@@ -143,27 +151,32 @@ private:
         #version 450 core
         in vec3 vColor;
         in vec3 vNormal;
-        out vec4 color;
+        out vec3 FragColor;
+
         uniform vec3 lightPos;
         uniform vec3 cameraPos;
         uniform vec3 lightColor;
+        
         void main()
         {
             // ambient
-            vec3 ambient = 0.1 * vColor;
+            float ambientStrength = 0.1;
+            vec3 ambient = ambientStrength * lightColor;
             
             // diffuse
             vec3 norm = normalize(vNormal);
             vec3 lightDir = normalize(lightPos - cameraPos);
             float diff = max(dot(norm, lightDir), 0.0);
-            vec3 diffuse = diff * lightColor * vColor;
+            vec3 diffuse = diff * lightColor;
             
             // specular
+            float specStrength = 0.5;
             vec3 viewDir = normalize(cameraPos - lightPos);
             vec3 reflectDir = reflect(-lightDir, norm);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-            vec3 specular = spec * lightColor * vColor;
-            color = vec4(ambient + diffuse + specular, 1.0);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16);
+            vec3 specular = specStrength * spec * lightColor;
+
+            FragColor = (ambient + diffuse + specular) * vColor;
         }
     )";
 };

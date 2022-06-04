@@ -65,3 +65,11 @@ m_PointCloud load_mesh(const std::string &filename, bool exchange_yz)
 
     return vertices;
 }
+
+glm::vec3 m_PointCloud::centroid() const
+{
+    glm::dvec3 c(0.0);
+    for (const auto &v : v)
+        c += v.p;
+    return c / static_cast<double>(v.size());
+}

@@ -76,3 +76,4 @@ glm::vec3 centroid(const PointCloud &points);
  * @return glm::vec3 the center of the object.
  */
 glm::vec3 centroid(const PointCloud &points, const Mask &mask);
+glm::vec3 centroid(const m_PointCloud &points, const Mask &mask);

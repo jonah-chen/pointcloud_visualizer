@@ -27,6 +27,8 @@ struct m_PointCloud
     inline PNC *vertices() { return v.data(); }
     inline const unsigned int *indices() const { return (const unsigned int *)f.data(); }
     inline unsigned int *indices() { return (unsigned int *)f.data(); }
+
+    glm::vec3 centroid() const;
 };
 
 /**

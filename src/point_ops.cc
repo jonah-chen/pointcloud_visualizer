@@ -160,3 +160,18 @@ glm::vec3 centroid(const PointCloud &points, const Mask &mask)
     }
     return c / static_cast<double>(count);
 }
+
+glm::vec3 centroid(const m_PointCloud &points, const Mask &mask)
+{
+    glm::dvec3 c(0.0);
+    int count = 0;
+    for (size_t i = 0; i < mask.mask.size(); ++i)
+    {
+        if (mask.mask[i])
+        {
+            c += points.v[i].p;
+            ++count;
+        }
+    }
+    return c / static_cast<double>(count);
+}
