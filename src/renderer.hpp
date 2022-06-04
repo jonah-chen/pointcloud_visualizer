@@ -111,6 +111,13 @@ private:
     GLuint vao_, vbo_, ebo_;
     GLuint shader_;
 
+    size_t num_indices_;
+
+    GLint view_proj_loc_;
+    GLint lightPos_loc_;
+    GLint cameraPos_loc_;
+    GLint lightColor_loc_;
+
 private:
     // perform shading
     const char *v_src = R"(

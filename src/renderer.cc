@@ -119,6 +119,8 @@ PointRenderer::PointRenderer(bool fullscreen)
 {
     window_ = init_window(fullscreen);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
 #ifndef NDEBUG
     if (OPENGL_VERSION_MAJOR >= 4 && OPENGL_VERSION_MINOR >= 3)
@@ -198,6 +200,8 @@ MeshRenderer::MeshRenderer(const m_PointCloud &pc, bool fullscreen)
     }
 #endif
 
+    glEnable(GL_DEPTH_TEST);
+
     glGenVertexArrays(1, &vao_);
     glBindVertexArray(vao_);
 
@@ -215,9 +219,16 @@ MeshRenderer::MeshRenderer(const m_PointCloud &pc, bool fullscreen)
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, POINT_SIZE, (const void*)offsetof(vertex_type, c));
     glEnableVertexAttribArray(2);
 
+
+    num_indices_ = pc.f.size() * 3; 
     glGenBuffers(1, &ebo_);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, pc.size() * sizeof(GLuint), pc.indices(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_indices_ * sizeof(unsigned int), pc.indices(), GL_DYNAMIC_DRAW);
 
     shader_ = compile_shader(v_src, f_src);
+
+    view_proj_loc_ = glGetUniformLocation(shader_, "view_proj");
+    lightColor_loc_ = glGetUniformLocation(shader_, "lightColor");
+    lightPos_loc_ = glGetUniformLocation(shader_, "lightPos");
+    cameraPos_loc_ = glGetUniformLocation(shader_, "cameraPos");
 }
