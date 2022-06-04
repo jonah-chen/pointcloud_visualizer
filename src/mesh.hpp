@@ -40,5 +40,3 @@ struct m_PointCloud
  * @return o3d_PointCloud The meshed and ordered pointcloud. 
  */
 m_PointCloud load_mesh(const std::string &mesh, bool exchange_yz);
-
-m_PointCloud::F resort_async(const m_PointCloud &mesh, const glm::vec3 &pos);

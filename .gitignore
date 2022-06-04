@@ -8,3 +8,4 @@
 *.ini
 /build/
 /tmp/
+/include/open3d/
