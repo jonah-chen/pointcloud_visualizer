@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "camera.hpp"
 #include <glm/glm.hpp>
 #include <open3d/Open3D.h>
 
@@ -15,14 +16,17 @@ struct PNC
 
 struct m_PointCloud 
 {
-    std::vector<PNC> v;
-    std::vector<Eigen::Vector3i> f;
-    m_PointCloud(size_t);
-    constexpr size_t size() const { return v.size(); }
-    constexpr const PNC *vertices() const { return v.data(); }
-    constexpr PNC *vertices() { return v.data(); }
-    constexpr const unsigned int *indices() const { return (const unsigned int *)f.data(); }
-    constexpr unsigned int *indices() { return (unsigned int *)f.data(); }
+    using V = std::vector<PNC>;
+    using F = std::vector<Eigen::Vector3i>;
+    V v;
+    F f;
+    m_PointCloud(size_t n) : v(n), f(n) {}
+    m_PointCloud(size_t n, F &&f) : v(n), f(std::move(f)) {}
+    inline size_t size() const { return v.size(); }
+    inline const PNC *vertices() const { return v.data(); }
+    inline PNC *vertices() { return v.data(); }
+    inline const unsigned int *indices() const { return (const unsigned int *)f.data(); }
+    inline unsigned int *indices() { return (unsigned int *)f.data(); }
 };
 
 /**
@@ -36,3 +40,5 @@ struct m_PointCloud
  * @return o3d_PointCloud The meshed and ordered pointcloud. 
  */
 m_PointCloud load_mesh(const std::string &mesh, bool exchange_yz);
+
+m_PointCloud::F resort_async(const m_PointCloud &mesh, const glm::vec3 &pos);

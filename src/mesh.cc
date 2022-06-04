@@ -1,5 +1,6 @@
 
 #include "mesh.hpp"
+#include <glm/gtx/norm.hpp>
 
 
 namespace std
@@ -33,7 +34,7 @@ m_PointCloud load_mesh(const std::string &filename, bool exchange_yz)
     if (pc.vertices_.size() != pc.vertex_normals_.size())
         throw std::runtime_error("load: mesh has different number of vertices and vertex normals");
 
-    m_PointCloud vertices(pc.vertices_.size());
+    m_PointCloud vertices(pc.vertices_.size(), std::move(pc.triangles_));
 
     if (exchange_yz)
     {
@@ -60,8 +61,7 @@ m_PointCloud load_mesh(const std::string &filename, bool exchange_yz)
             vertices.v[i].n = {n.x(), n.y(), n.z()};
             vertices.v[i].c = {c.x(), c.y(), c.z()};
         }
-        return vertices;
     }
+
+    return vertices;
 }
-
-
