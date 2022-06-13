@@ -251,6 +251,9 @@ MeshRenderer::MeshRenderer(const m_PointCloud &pc, bool fullscreen)
     lightColor_loc_ = glGetUniformLocation(shader_, "lightColor");
     lightPos_loc_ = glGetUniformLocation(shader_, "lightPos");
     cameraPos_loc_ = glGetUniformLocation(shader_, "cameraPos");
+    ambientStrength_loc_ = glGetUniformLocation(shader_, "ambientStrength");
+    diffuseStrength_loc_ = glGetUniformLocation(shader_, "diffuseStrength");
+    specStrength_loc_ = glGetUniformLocation(shader_, "specStrength");
 }
 
 MeshRenderer::~MeshRenderer()
@@ -275,5 +278,8 @@ void MeshRenderer::draw(const Camera &camera)
     glUniform3fv(cameraPos_loc_, 1, glm::value_ptr(camera.pos()));
     glUniform3fv(lightPos_loc_, 1, lightPos_);
     glUniform3fv(lightColor_loc_, 1, lightColor_);
+    glUniform1f(ambientStrength_loc_, ambientStrength_);
+    glUniform1f(diffuseStrength_loc_, diffuseStrength_);
+    glUniform1f(specStrength_loc_, specStrength_);
     glDrawElements(GL_TRIANGLES, num_indices_, GL_UNSIGNED_INT, nullptr);
 }

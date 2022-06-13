@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 project(Pointcloud_Visualizer)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_RELEASE_FLAGS "-O3 -fno-rtti -flto=auto")
 
 find_package(PCL REQUIRED)
 find_package(OpenGL REQUIRED)

@@ -113,6 +113,9 @@ public:
 
     constexpr float *lightColor_ptr() { return lightColor_; }
     constexpr float *lightPos_ptr() { return lightPos_; }
+    constexpr float *ambientStrength_ptr() { return &ambientStrength_; }
+    constexpr float *diffuseStrength_ptr() { return &diffuseStrength_; }
+    constexpr float *specStrength_ptr() { return &specStrength_; }
 
 private:
     GLFWwindow *window_;
@@ -125,10 +128,16 @@ private:
     GLint lightPos_loc_;
     GLint cameraPos_loc_;
     GLint lightColor_loc_;
+    GLint ambientStrength_loc_;
+    GLint diffuseStrength_loc_;
+    GLint specStrength_loc_;
 
     float aspect_;
     uniform3 lightPos_ {};
     uniform3 lightColor_ { 1.0f, 1.0f, 1.0f };
+    float ambientStrength_ = 1.0f;
+    float diffuseStrength_ = 0.0f;
+    float specStrength_ = 0.0f;
 
 private:
     // perform shading
@@ -159,27 +168,30 @@ private:
         uniform vec3 lightPos;
         uniform vec3 cameraPos;
         uniform vec3 lightColor;
+
+        uniform float ambientStrength;
+        uniform float diffuseStrength;
+        uniform float specStrength;
         
         void main()
         {
             // ambient
-            float ambientStrength = 0.1;
             vec3 ambient = ambientStrength * lightColor;
             
             // diffuse
             vec3 norm = normalize(vNormal);
             vec3 lightDir = normalize(lightPos - cameraPos);
             float diff = max(dot(norm, lightDir), 0.0);
-            vec3 diffuse = diff * lightColor;
+            vec3 diffuse = diffuseStrength * diff * lightColor;
             
             // specular
-            float specStrength = 0.5;
             vec3 viewDir = normalize(cameraPos - lightPos);
             vec3 reflectDir = reflect(-lightDir, norm);
             float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8);
             vec3 specular = specStrength * spec * lightColor;
 
-            FragColor = (ambient + diffuse + specular) * vColor;
+            vec3 unscaled = (ambient + diffuse + specular) * vColor;
+            FragColor = unscaled / (ambientStrength + diffuseStrength + specStrength);
         }
     )";
 };

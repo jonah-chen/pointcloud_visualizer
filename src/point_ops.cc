@@ -72,7 +72,30 @@ void Mask::apply(m_PointCloud &points)
     for (size_t i = 0; i < mask.size(); ++i)
         if (mask[i])
             points.v[i].c = color;
-            
+}
+
+void Mask::apply_inv(PointCloud &points)
+{
+    if (points.size() != mask.size())
+        throw std::runtime_error("apply_mask: cannot apply a mask with " + 
+            std::to_string(mask.size()) + " points to a cloud with " + 
+            std::to_string(points.size()) + " points.");
+#pragma omp parallel for
+    for (size_t i = 0; i < points.size(); ++i)
+        if (!mask[i])
+            points[i].rgb = clear_color;
+}
+
+void Mask::apply_inv(m_PointCloud &points)
+{
+    if (points.size() != mask.size())
+        throw std::runtime_error("apply_mask: cannot apply a mask with " + 
+            std::to_string(mask.size()) + " points to a cloud with " + 
+            std::to_string(points.size()) + " points.");
+#pragma omp parallel for
+    for (size_t i = 0; i < mask.size(); ++i)
+        if (!mask[i])
+            points.v[i].c = clear_color;
 }
 
 std::vector<Mask> load_masks(const std::string &filename)

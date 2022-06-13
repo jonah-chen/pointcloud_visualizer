@@ -67,4 +67,5 @@ public:
 private:
     void C_controls() override;
     float *lightColor_ptr_, *lightPos_ptr_;
+    float *ambientIntensity_ptr_, *diffuseIntensity_ptr_, *specIntensity_ptr_;
 };

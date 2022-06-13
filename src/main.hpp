@@ -56,6 +56,7 @@ int _main(int argc, char *argv[], std::function<Geometry(const std::string &, bo
     std::vector<Mask> masks;
     std::vector<bool> masks_applied;
     bool mask_updated;
+    bool mask_invert = args.find("invert") != args.end();
     const Geometry og_cloud = load_fn(args["pointcloud"], args.find("yz") == args.end());
     
     Geometry cloud = og_cloud; // make a copy of original order for masking purposes
@@ -84,7 +85,7 @@ int _main(int argc, char *argv[], std::function<Geometry(const std::string &, bo
         renderer.aspect(),
         0.1f,
         200.0f,
-        0.0f
+        ground_level
     );
 
     HUD hud(renderer.window(), camera, masks, renderer);
@@ -97,7 +98,7 @@ int _main(int argc, char *argv[], std::function<Geometry(const std::string &, bo
         glfwPollEvents();
         inputs = user_inputs::fetch(renderer.window());
         
-        if (to_move)
+        if (to_move && glfwGetInputMode(renderer.window(), GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
             execute_movement(camera, inputs, prev_inputs, ImGui::GetIO().Framerate);
         else
             to_move = true;
@@ -119,7 +120,15 @@ int _main(int argc, char *argv[], std::function<Geometry(const std::string &, bo
             if (masks[i] != masks_applied[i])
             {
                 mask_updated = true;
-                masks_applied[i] = masks[i].active;
+                if (mask_invert && masks[i].active)
+                {
+                    std::fill(masks_applied.begin(), masks_applied.end(), false);
+                    for (auto &mask : masks)
+                        mask.active = false;
+                    masks_applied[i] = masks[i].active = true;
+                    break;
+                }
+                else masks_applied[i] = masks[i].active;
             }
         }
         if (mask_updated)
@@ -127,8 +136,15 @@ int _main(int argc, char *argv[], std::function<Geometry(const std::string &, bo
             cloud = og_cloud;
             // apply the masks in the opposite order
             for (auto msk_it = masks.rbegin(); msk_it != masks.rend(); ++msk_it)
+            {
                 if (msk_it->active)
-                    msk_it->apply(cloud);
+                {
+                    if (mask_invert)
+                        msk_it->apply_inv(cloud);
+                    else
+                        msk_it->apply(cloud);
+                }
+            }
             to_move = false;
         }
 

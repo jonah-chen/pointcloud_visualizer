@@ -18,7 +18,16 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    auto poission_output = open3d::geometry::TriangleMesh::CreateFromPointCloudPoisson(pc, 12);
+    if (!pc.HasNormals())
+    {
+        std::cerr << "Point cloud does not have normals. Computing normals..." << std::endl;
+        pc.EstimateNormals(open3d::geometry::KDTreeSearchParamKNN(), false);
+    }
+
+    int depth = 12;
+    if (argc > 3)
+        depth = std::stoi(argv[3]);
+    auto poission_output = open3d::geometry::TriangleMesh::CreateFromPointCloudPoisson(pc, depth);
     auto poission_mesh = std::get<0>(poission_output);
 
     if (!open3d::io::WriteTriangleMesh(argv[2], *poission_mesh))

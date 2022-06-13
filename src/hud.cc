@@ -120,6 +120,9 @@ MeshHUD::MeshHUD(GLFWwindow *window, Camera &camera, std::vector<Mask> &masks,
 {
     lightColor_ptr_ = renderer.lightColor_ptr();
     lightPos_ptr_ = renderer.lightPos_ptr();
+    ambientIntensity_ptr_ = renderer.ambientStrength_ptr();
+    diffuseIntensity_ptr_ = renderer.diffuseStrength_ptr();
+    specIntensity_ptr_ = renderer.specStrength_ptr();
 
     const auto &pos = camera.pos();
     lightPos_ptr_[0] = pos.x;
@@ -132,4 +135,7 @@ void MeshHUD::C_controls()
     HUD::C_controls();
     ImGui::ColorEdit3("Light Color", lightColor_ptr_);
     ImGui::DragFloat3("Light Position", lightPos_ptr_, 0.2f, -100.f, 100.f);
+    ImGui::SliderFloat("Ambient Intensity", ambientIntensity_ptr_, 0.f, 1.f);
+    ImGui::SliderFloat("Diffuse Intensity", diffuseIntensity_ptr_, 0.f, 1.f);
+    ImGui::SliderFloat("Specular Intensity", specIntensity_ptr_, 0.f, 1.f);
 }

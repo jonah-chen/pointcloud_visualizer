@@ -6,6 +6,7 @@
 
 struct Mask
 {
+    constexpr static glm::vec3 clear_color = glm::vec3(0.2f, 0.2f, 0.2f);
     std::vector<bool> mask;
     glm::vec3 color;
     std::string cls;
@@ -31,6 +32,16 @@ struct Mask
     void apply(PointCloud &points);
 
     void apply(m_PointCloud &points);
+
+    /**
+     * Apply the mask by making all other points into a background color
+     * 
+     * @param points the point cloud to apply the mask to.
+     * @note the point cloud must have the same number of points as the mask.
+     */
+    void apply_inv(PointCloud &points);
+
+    void apply_inv(m_PointCloud &points);
 };
 
 struct BBox
