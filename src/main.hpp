@@ -20,8 +20,10 @@ inline std::unordered_map<std::string, char*> parse_args(int argc, char **argv)
                      "Options:\n"
                      "  --windowed : run in windowed mode\n"
                      "  --yz : swap yz coordinates in input file\n"
-                     "  --mask <path to mask file> : mask file with format:\n"
+                     "  --masks <path to mask file> : mask file with format:\n"
                      "      <path to mask> <color hex code> <class>\n"
+                     "  --invert: instead of coloring in the mask, gray out all "
+                     "points that are not in the mask\n"
                      "      ...\n";
 
         exit(EXIT_SUCCESS);
