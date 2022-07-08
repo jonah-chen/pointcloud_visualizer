@@ -6,6 +6,7 @@
 #include <vector>
 #include <numeric>
 #include <glm/gtc/type_ptr.hpp>
+#include <algorithm>
 
 constexpr int OPENGL_VERSION_MAJOR = 4;
 constexpr int OPENGL_VERSION_MINOR = 5;
@@ -94,8 +95,9 @@ GLFWwindow *init_window(bool fullscreen, float &aspect)
     glfwSwapInterval(1);
     
 	// disable cursor
+#ifdef NDEBUG
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+#endif
     if (glewInit() != GLEW_OK)
         throw std::runtime_error("Failed to initialize GLEW");
 
@@ -132,6 +134,17 @@ GLuint compile_shader(const char *vertex, const char *fragment)
     return shader;
 }
 
+}
+
+Renderer::Renderer(bool fullscreen)
+{
+    window_ = init_window(fullscreen, aspect_);
+}
+
+Renderer::~Renderer()
+{
+    glfwDestroyWindow(window_);
+    glfwTerminate();
 }
 
 PointRenderer::PointRenderer(const PointCloud &cloud, bool fullscreen)
@@ -282,4 +295,91 @@ void MeshRenderer::draw(const Camera &camera)
     glUniform1f(diffuseStrength_loc_, diffuseStrength_);
     glUniform1f(specStrength_loc_, specStrength_);
     glDrawElements(GL_TRIANGLES, num_indices_, GL_UNSIGNED_INT, nullptr);
+}
+
+VoxelRenderer::VoxelRenderer(const std::vector<glm::vec3> &pv, const std::vector<unsigned int> &pi, const std::vector<glm::vec3> &pf,
+                        const std::vector<glm::vec3> &gv, const std::vector<unsigned int> &gi, const std::vector<glm::vec3> &gf, bool fullscreen)
+    : Renderer(fullscreen)
+{
+#ifndef NDEBUG
+    if (OPENGL_VERSION_MAJOR >= 4 && OPENGL_VERSION_MINOR >= 3)
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(debugCallback, nullptr);
+    }
+#endif
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    glGenVertexArrays(1, &vao_);
+    glBindVertexArray(vao_);
+
+    
+    auto vbo_size = (pv.size() + gv.size()) * sizeof(glm::vec3);
+    glm::vec3 *vbo_data = new glm::vec3[pv.size() + gv.size()];
+    memcpy(vbo_data, pv.data(), pv.size() * sizeof(glm::vec3));
+    memcpy(vbo_data + pv.size(), gv.data(), gv.size() * sizeof(glm::vec3));
+    glGenBuffers(1, &vbo_xyz_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_xyz_);
+    glBufferData(GL_ARRAY_BUFFER, vbo_size, vbo_data, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
+    glEnableVertexAttribArray(0);
+    delete[] vbo_data;
+
+    auto rgb_size = (pf.size() + gf.size()) * sizeof(glm::vec3);
+    glm::vec3 *rgb_data = new glm::vec3[pf.size() + gf.size()];
+    memcpy(rgb_data, pf.data(), pf.size() * sizeof(glm::vec3));
+    memcpy(rgb_data + pf.size(), gf.data(), gf.size() * sizeof(glm::vec3));
+    glGenBuffers(1, &vbo_rgb_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_rgb_);
+    glBufferData(GL_ARRAY_BUFFER, rgb_size, rgb_data, GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
+    glEnableVertexAttribArray(1);
+    delete[] rgb_data;
+
+    // unsigned int ebo_data[] = {
+    //     0, 1, 2,
+    // };
+    // auto ebo_size = sizeof(ebo_data);
+    auto ebo_size = (pi.size() + gi.size()) * sizeof(unsigned int);
+    unsigned int *ebo_data = new unsigned int[pi.size() + gi.size()];
+    memcpy(ebo_data, pi.data(), pi.size() * sizeof(unsigned int));
+    // find the max index for pi
+    auto max_pi = 1 + *std::max_element(pi.begin(), pi.end());
+    // manually add the indices for gi
+    for (auto i = 0; i < gi.size(); ++i)
+        ebo_data[i + pi.size()] = max_pi + gi[i];
+    
+    num_pts = pi.size();
+    num_gt = gi.size();
+    offset_pts = 0;
+    offset_gt = num_pts * sizeof(unsigned int);
+
+    glGenBuffers(1, &ebo_);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, ebo_size, ebo_data, GL_STATIC_DRAW);
+    // delete[] ebo_data;
+
+    shader_ = compile_shader(v_src, f_src);
+    view_proj_loc_ = glGetUniformLocation(shader_, "view_proj");
+}
+
+VoxelRenderer::~VoxelRenderer()
+{
+    glDeleteBuffers(1, &vbo_xyz_);
+    glDeleteBuffers(1, &vbo_rgb_);
+    glDeleteBuffers(1, &ebo_);
+    glDeleteVertexArrays(1, &vao_);
+    glDeleteProgram(shader_);
+    glfwTerminate();
+}
+
+void VoxelRenderer::draw(const Camera &camera)
+{
+    glUniformMatrix4fv(view_proj_loc_, 1, GL_FALSE, glm::value_ptr(camera.view_proj()));
+    glDrawElements(GL_TRIANGLES, num_pts, GL_UNSIGNED_INT, (const void *)offset_pts);
+    glDrawElements(GL_TRIANGLES, num_gt, GL_UNSIGNED_INT, (const void *)offset_gt);
+    // glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 }

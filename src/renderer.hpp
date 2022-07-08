@@ -8,6 +8,23 @@
 #include "camera.hpp"
 #include "mesh.hpp"
 
+class Renderer
+{
+public:
+    virtual ~Renderer();
+    /**
+     * Functions to control the cursor state
+     */
+    inline void disable_cursor() { glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
+    inline void enable_cursor() { glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
+    inline GLFWwindow *window() const { return window_; }
+    constexpr float aspect() const { return aspect_; }
+protected:
+    Renderer(bool fullscreen);
+    GLFWwindow *window_;
+    float aspect_;    
+};
+
 class PointRenderer
 {
 public:
@@ -195,3 +212,47 @@ private:
         }
     )";
 };
+
+class VoxelRenderer : public Renderer
+{
+public:
+    VoxelRenderer(const std::vector<glm::vec3> &pv, 
+                    const std::vector<unsigned int> &pi, 
+                    const std::vector<glm::vec3> &pf,
+                    const std::vector<glm::vec3> &gv,
+                    const std::vector<unsigned int> &gi,
+                    const std::vector<glm::vec3> &gf, bool fullscreen);
+    ~VoxelRenderer();
+
+    void draw(const Camera &camera);
+
+private:
+    GLFWwindow *window_;
+    GLuint vao_;
+    GLuint vbo_xyz_, vbo_rgb_;
+    GLuint ebo_;
+    GLuint shader_;
+    std::size_t num_pts, num_gt, offset_pts, offset_gt;
+    GLint view_proj_loc_;
+    float aspect_;
+
+    const char *v_src = "#version 450 core\n"
+        "layout(location = 0) in vec3 aPos;\n"
+        "layout(location = 1) in vec3 aColor;\n"
+        "uniform mat4 view_proj;\n"
+        "out vec3 vColor;\n"
+        "void main()\n"
+        "{\n"
+        "    gl_Position = view_proj * vec4(aPos, 1.0);\n"
+        "    vColor = aColor;\n"
+        "}";
+    
+    const char *f_src = "#version 450 core\n"
+        "in vec3 vColor;\n"
+        "out vec4 FragColor;\n"
+        "void main()\n"
+        "{\n"
+        "    FragColor = vec4(vColor, 1.0);\n"
+        "}";
+};
+

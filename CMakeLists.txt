@@ -28,7 +28,8 @@ set(Point_Src ${SRC_DIR}/camera.cc
               ${SRC_DIR}/renderer.cc
               ${SRC_DIR}/input.cc
               ${SRC_DIR}/point_ops.cc
-              ${SRC_DIR}/hud.cc)
+              ${SRC_DIR}/hud.cc
+              ${SRC_DIR}/voxel.cc)
 
 include_directories(${SRC_DIR} 
                     ${INCLUDE_DIR}
@@ -46,19 +47,26 @@ add_library(ImGui_GLFW STATIC
             ${INCLUDE_DIR}/imgui/imgui_tables.cpp
             ${INCLUDE_DIR}/imgui/imgui_widgets.cpp
             ${INCLUDE_DIR}/imgui/imgui_draw.cpp)
-target_link_libraries(ImGui_GLFW ${glfw3_LIBRARIES})
+target_link_libraries(ImGui_GLFW ${glfw3_LIBRARIES} ${CMAKE_DL_LIBS})
 
+add_library(Point_lib STATIC ${Point_Src})
+target_link_libraries(Point_lib PUBLIC ${Point_Dependencies})
 
-add_executable(Pointcloud_Visualizer ${SRC_DIR}/pointcloud_visualizer.cc ${Point_Src})
-target_link_libraries(Pointcloud_Visualizer PUBLIC ${Point_Dependencies})
+add_executable(Pointcloud_Visualizer ${SRC_DIR}/pointcloud_visualizer.cc)
+target_link_libraries(Pointcloud_Visualizer PUBLIC Point_lib)
 
-add_executable(Meshed_Visualizer ${SRC_DIR}/meshed_visualizer.cc 
-                                ${Point_Src}
+add_executable(Meshed_Visualizer ${SRC_DIR}/meshed_visualizer.cc
                                 ${SRC_DIR}/mesh.cc)
-target_link_libraries(Meshed_Visualizer PUBLIC ${Point_Dependencies} Open3D)
+target_link_libraries(Meshed_Visualizer PUBLIC Open3D Point_lib)
+
+add_executable(Voxel_Visualizer ${SRC_DIR}/voxel_visualizer.cc)
+target_link_libraries(Voxel_Visualizer PUBLIC Point_lib)
 
 add_executable(BPA utils/bpa.cc)
 target_link_libraries(BPA PUBLIC Open3D pthread)
 
 add_executable(Poission utils/poission.cc)
 target_link_libraries(Poission PUBLIC Open3D pthread)
+
+add_executable(a.out ${SRC_DIR}/sandbox.cc)
+target_link_libraries(a.out PUBLIC Point_lib)
