@@ -1,6 +1,7 @@
 
 #include "voxel.hpp"
 #include "renderer.hpp"
+#include "cmap.hpp"
 #include "input.hpp"
 #include <algorithm>
 #include <iostream>
@@ -9,17 +10,24 @@
 template<typename T>
 using vv = std::vector<T>;
 
-int main()
+int main(int argc, char *argv[])
 {
-    auto b = read_voxels("../tmp/voxel/1");
+    const char *raw = argv[1];
+    if (argc != 2)
+    {
+#ifdef NDEBUG
+        std::cout << "Usage: ./Voxel_Visualizer <input dir (with gt and voxelized pointcloud)>\n";
+        return 1;
+#else
+        raw = "../tmp/voxel/4";
+#endif
+    }
+    auto b = read_voxels(raw);
     auto [b_pv, b_pi] = voxel_geometry(0.02f, b.pt_voxels);
     auto [b_gv, b_gi] = voxel_geometry(0.32f, b.gt_voxels);
     auto b_pf = repeat8(b.pt_colors);
-    auto b_gf = repeat8(colorize(b.gt_labels));
+    auto b_gf = repeat8(colorize(b.gt_labels, cmap::jet));
     
-    // std::cout << *std::max_element((float*)&*b_pf.begin(), (float*)&*b_pf.end()) << "\n";
-    // std::cout << *std::min_element((float*)&*b_pf.begin(), (float*)&*b_pf.end()) << std::endl;
-    // return 1;
     VoxelRenderer renderer(b_pv, b_pi, b_pf, b_gv, b_gi, b_gf, false);
     Camera camera (
         glm::vec3(0.0f, 0.0f, 0.0f),

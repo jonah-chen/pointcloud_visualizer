@@ -69,21 +69,15 @@ VoxelGeo voxel_geometry(float voxel_size, const std::vector<glm::ivec3> &voxels,
     return std::make_pair(vertices, indices);
 }
 
-std::vector<glm::vec3> colorize(const std::vector<uint16_t> &labels, std::optional<std::vector<glm::vec3>> colors)
+std::vector<glm::vec3> colorize(const std::vector<uint16_t> &labels, cmap::fn col)
 {
-    if (!colors)
-    {
-        // use default color RED for all labels
-        std::vector<glm::vec3> result(labels.size(), glm::vec3(1.0f, 0.0f, 0.0f));
-        return result;
-    }
-    else
-    {
-        std::vector<glm::vec3> result(labels.size());
-        for (auto &&label : labels)
-            result.emplace_back(colors->operator[](label));
-        return result;
-    }
+    // get the max label
+    const uint16_t max_label = *std::max_element(labels.begin(), labels.end());
+    std::vector<glm::vec3> result;
+    result.reserve(labels.size());
+    for (auto &&label : labels)
+        result.emplace_back(col(label / (float)max_label));
+    return result;
 }
 
 

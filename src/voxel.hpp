@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <filesystem>
 #include <optional>
+#include "cmap.hpp"
 
 using VoxelGeo = std::pair<std::vector<glm::vec3>, std::vector<unsigned int>>;
 
@@ -20,7 +21,7 @@ std::vector<T> repeat8(const std::vector<T> &properties)
     return result;
 }
 
-std::vector<glm::vec3> colorize(const std::vector<uint16_t> &labels, std::optional<std::vector<glm::vec3>> colors = std::nullopt);
+std::vector<glm::vec3> colorize(const std::vector<uint16_t> &labels, cmap::fn col = cmap::red);
 
 struct SceneInstance
 {
